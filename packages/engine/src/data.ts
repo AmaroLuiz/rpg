@@ -18,11 +18,26 @@ export interface StoredList {
   items: Record<string, Record<string, Primitive>>;
 }
 
+/** Escolhas feitas no assistente de criação, para poder voltar e refazer. */
+export interface CreationState {
+  method?: string;
+  /** Valor comprado (pontos) por atributo. */
+  base?: Record<string, number>;
+  /** Ajustes de raça/origem por atributo. */
+  adjust?: Record<string, number>;
+  /** Rolagens feitas, na ordem, e qual atributo recebeu cada uma (índice). */
+  rolls?: Array<{ total: number; value: number; text: string }>;
+  assign?: Record<string, number>;
+  /** Passo do assistente em que a pessoa parou. */
+  step?: string;
+}
+
 /** O que a ficha guarda (coluna `characters.data`). Só valores digitados; nada calculado. */
 export interface CharacterData {
   values: Record<string, Primitive | ResourceValue>;
   lists: Record<string, StoredList>;
   conditions: string[];
+  creation?: CreationState;
 }
 
 /** Item do inventário (tabela `items`), no formato que o motor consome. */

@@ -1,7 +1,7 @@
 {
   "id": "tormenta20",
   "name": "Tormenta20 (Jogo do Ano)",
-  "version": 1,
+  "version": 2,
   "description": "Template para Tormenta20, edição Jogo do Ano (atributos usados direto como bônus). Traz estrutura e números mecânicos; textos de raças, origens, poderes e magias ficam a cargo da mesa. Uma classe por personagem. Confira os números com o livro antes de usar.",
   "fields": [
     {
@@ -958,6 +958,56 @@
       "level": "info"
     }
   ],
+  "creation": {
+    "attributes": {
+      "fields": [
+        "for",
+        "des",
+        "con",
+        "int",
+        "sab",
+        "car"
+      ],
+      "adjustments": {
+        "label": "Raça e origem"
+      },
+      "methods": [
+        {
+          "id": "pontos",
+          "label": "Comprar com pontos",
+          "kind": "pointBuy",
+          "base": 0,
+          "budget": 10,
+          "min": -1,
+          "max": 4,
+          "cost": {
+            "-1": -1,
+            "0": 0,
+            "1": 1,
+            "2": 2,
+            "3": 4,
+            "4": 7
+          },
+          "maxBelowBase": 1,
+          "description": "Todos começam em 0 e você tem 10 pontos. Custos: 1 custa 1, 2 custa 2, 3 custa 4, 4 custa 7. Reduzir um atributo para −1 devolve 1 ponto."
+        },
+        {
+          "id": "rolar",
+          "label": "Rolar",
+          "kind": "roll",
+          "expr": "4d6kh3",
+          "convert": "lookup(@valor, 3, -2, 8, -1, 10, 0, 12, 1, 14, 2, 16, 3, 18, 4)",
+          "description": "Role 4d6 e descarte o menor, seis vezes. Cada total vira um valor pela tabela (8–9 = −1, 10–11 = 0, 12–13 = +1… 18 = +4). Escolha onde fica cada resultado."
+        },
+        {
+          "id": "manual",
+          "label": "Valores manuais",
+          "kind": "manual",
+          "description": "Digite os atributos direto, como a mesa combinou."
+        }
+      ]
+    }
+  },
   "initiative": "iniciativa",
   "layout": {
     "tabs": [

@@ -12,7 +12,8 @@ Documento de arquitetura e modelo de dados: https://claude.ai/artifact/7NpTy27nT
 | M1 — Templates | Pronto: Ordem Paranormal e Tormenta20 (Jogo do Ano), com personagens de referência testados |
 | M2 — Fundação | Pronto: banco com RLS, login por e-mail (Google pronto no código, falta configurar o OAuth), criar mesa, convite por código e link, papéis, presença e atualização ao vivo |
 | M3 — Ficha | Pronto: ficha gerada pelo template (abas, seções, listas), recursos com +/−, condições, origem de cada número, avisos, notas, fila offline que sobrevive a fechar o app, edição ao vivo entre mestre e jogador |
-| M4 — Criação | Próximo |
+| M4 — Criação | Pronto: assistente passo a passo definido pelo template, atributos por pontos / rolagem / manual com ajuste de raça, rascunho retomado, revisão com avisos, modo livre, retrato |
+| M5 — Mesa (rolagens e combate) | Próximo |
 
 ## Estrutura
 
@@ -84,6 +85,8 @@ Só em rolagens:
 | Pool de sucessos | `6d10cs>=8` |
 | Opções da rolagem | `@rolagem.dados` (dados extras), `@rolagem.bonus` (situacional) |
 | Expressão guardada | `roll(@self.dano)` |
+
+Criação: o bloco `creation.attributes` define os atributos e os métodos (`pointBuy` com tabela de custo e limite de atributos baixos, `roll` com expressão e `convert` usando `@valor`, `manual`), mais uma coluna opcional de ajustes (`adjustments`). Os passos do assistente vêm de `wizard.steps`.
 
 Modificadores (de itens equipados, condições e escolhas de catálogo) entram sozinhos no campo-alvo: `{ "target": "defesa", "value": 5 }`. Alvos de lista usam `lista.chave.subcampo`, como `pericias.reflexos.bonus`. Alvos que não são campo são lidos com `mod("alvo")`.
 

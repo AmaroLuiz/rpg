@@ -1,5 +1,6 @@
 export * from './ast.js';
 export * from './compile.js';
+export * from './creation.js';
 export * from './data.js';
 export * from './dice.js';
 export * from './errors.js';

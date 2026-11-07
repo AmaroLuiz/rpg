@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router';
 import { useCharacters, useCreateCharacter } from '../api/characters';
 import { Button, Card, ErrorNote, Input } from '../components/ui';
 import { friendlyError } from '../lib/errors';
+import { PortraitImage } from '../sheet/Portrait';
 
 export function CharacterList({ campaignId, userId, isGm }: { campaignId: string; userId: string; isGm: boolean }) {
   const { t } = useTranslation();
@@ -20,7 +21,8 @@ export function CharacterList({ campaignId, userId, isGm }: { campaignId: string
     const row = await create
       .mutateAsync({ name: name.trim(), ...(asNpc ? { kind: 'npc' as const, visibility: 'gm' as const } : {}) })
       .catch(() => null);
-    if (row) navigate(`/mesas/${campaignId}/personagens/${row.id}`);
+    // Fichas novas abrem no assistente; dá para pular para a ficha a qualquer momento.
+    if (row) navigate(`/mesas/${campaignId}/personagens/${row.id}/criar`);
   }
 
   const list = [...(characters.data ?? [])].sort((a, b) => Number(b.owner_id === userId) - Number(a.owner_id === userId));
@@ -60,10 +62,15 @@ export function CharacterList({ campaignId, userId, isGm }: { campaignId: string
       <ul className="flex flex-col divide-y divide-line">
         {list.map((c) => (
           <li key={c.id}>
-            <Link to={`/mesas/${campaignId}/personagens/${c.id}`} className="flex min-h-14 items-center gap-3 py-2">
+            <Link
+              to={`/mesas/${campaignId}/personagens/${c.id}${c.status === 'draft' && (c.owner_id === userId || isGm) ? '/criar' : ''}`}
+              className="flex min-h-14 items-center gap-3 py-2"
+            >
+              <PortraitImage path={c.portrait_path} name={c.nome || c.name} className="size-11 rounded-xl" />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{c.nome || c.name || '—'}</p>
                 <p className="flex items-center gap-1 truncate text-sm text-muted">
+                  {c.status === 'draft' && <span className="rounded bg-accent-soft px-1.5 text-xs text-accent">{t('creation.draft')}</span>}
                   {c.kind !== 'pc' && <span>{c.kind === 'npc' ? t('characters.npc') : t('characters.monster')} ·</span>}
                   {c.visibility === 'gm' && (
                     <>

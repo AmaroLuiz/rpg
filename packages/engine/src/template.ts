@@ -164,6 +164,52 @@ export const InventorySchema = z.object({
   capacityField: Id.optional(),
 });
 
+const PointBuySchema = z.object({
+  id: Id,
+  label: z.string().min(1),
+  kind: z.literal('pointBuy'),
+  /** Valor de partida de todo atributo. */
+  base: z.number().int(),
+  /** Pontos para gastar. */
+  budget: z.number().int(),
+  min: z.number().int(),
+  max: z.number().int(),
+  /** Custo total de cada valor, contado a partir de zero gasto (ex.: {"0": -1, "1": 0, "2": 1, "3": 2}). */
+  cost: z.record(z.string().regex(/^-?\d+$/), z.number()),
+  /** Quantos atributos podem ficar abaixo do valor de partida (sem limite se omitido). */
+  maxBelowBase: z.number().int().nonnegative().optional(),
+  description: z.string().optional(),
+});
+
+const RollMethodSchema = z.object({
+  id: Id,
+  label: z.string().min(1),
+  kind: z.literal('roll'),
+  /** Rolagem de cada atributo, ex.: "4d6kh3". */
+  expr: Formula,
+  /** Converte o total rolado no valor do atributo; usa @valor. Sem ela, vale o total. */
+  convert: Formula.optional(),
+  description: z.string().optional(),
+});
+
+const ManualMethodSchema = z.object({
+  id: Id,
+  label: z.string().min(1),
+  kind: z.literal('manual'),
+  description: z.string().optional(),
+});
+
+export const CreationSchema = z.object({
+  attributes: z
+    .object({
+      fields: z.array(Id).min(1),
+      methods: z.array(z.discriminatedUnion('kind', [PointBuySchema, RollMethodSchema, ManualMethodSchema])).min(1),
+      /** Coluna de ajustes somados ao valor comprado/rolado (raça, origem). */
+      adjustments: z.object({ label: z.string() }).optional(),
+    })
+    .optional(),
+});
+
 export const TemplateSchema = z.object({
   id: Id,
   name: z.string().min(1),
@@ -182,6 +228,7 @@ export const TemplateSchema = z.object({
   initiative: Id.optional(),
   layout: LayoutSchema,
   wizard: WizardSchema.optional(),
+  creation: CreationSchema.optional(),
 });
 
 export type Modifier = z.infer<typeof ModifierSchema>;
@@ -194,4 +241,8 @@ export type RollDef = z.infer<typeof RollSchema>;
 export type ConditionDef = z.infer<typeof ConditionSchema>;
 export type ValidationDef = z.infer<typeof ValidationSchema>;
 export type Template = z.infer<typeof TemplateSchema>;
+export type CreationDef = z.infer<typeof CreationSchema>;
+export type AttributeMethod = NonNullable<CreationDef['attributes']>['methods'][number];
+export type PointBuyMethod = Extract<AttributeMethod, { kind: 'pointBuy' }>;
+export type RollMethod = Extract<AttributeMethod, { kind: 'roll' }>;
 export type TemplateInput = z.input<typeof TemplateSchema>;

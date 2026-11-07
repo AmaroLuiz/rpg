@@ -8,6 +8,7 @@ import './i18n';
 import './index.css';
 import { Campaign } from './pages/Campaign';
 import { CharacterSheet } from './pages/CharacterSheet';
+import { CreateCharacter } from './pages/CreateCharacter';
 import { queryClient } from './sync';
 import { Campaigns } from './pages/Campaigns';
 import { Join } from './pages/Join';
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
       { path: '/mesas/nova', element: <NewCampaign /> },
       { path: '/mesas/:id', element: <Campaign /> },
       { path: '/mesas/:id/personagens/:charId', element: <CharacterSheet /> },
+      { path: '/mesas/:id/personagens/:charId/criar', element: <CreateCharacter /> },
       { path: '/convite/:code', element: <Join /> },
       { path: '/perfil', element: <Profile /> },
     ],

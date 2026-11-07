@@ -20,7 +20,7 @@ describe('personagens', () => {
       `select tv.version, tp.slug from public.characters c join public.template_versions tv on tv.id = c.template_version_id join public.templates tp on tp.id = tv.template_id where c.id = $1`,
       [id],
     );
-    expect(row).toEqual({ version: 1, slug: 'ordem_paranormal' });
+    expect(row).toEqual({ version: 2, slug: 'ordem_paranormal' });
     expect(await as(t.players[1]!, (q) => q('select id from public.characters where id = $1', [id]))).toHaveLength(1);
     expect(await as(t.outsider, (q) => q('select id from public.characters where id = $1', [id]))).toEqual([]);
   });
@@ -133,6 +133,13 @@ describe('operações na ficha', () => {
     await expectPgError(ops(t.players[1]!, id, [{ op: 'set', path: ['values', 'nex'], value: 99 }]), '42501');
     await expectPgError(ops(t.outsider, id, [{ op: 'set', path: ['values', 'nex'], value: 99 }]), '42501');
     expect((await dataOf(id)).values.nex).toBe(10);
+  });
+
+  it('aceita o estado do assistente de criação', async () => {
+    const t = await createTable();
+    const id = await createCharacter(t.players[0]!, t.campaign);
+    await ops(t.players[0]!, id, [{ op: 'set', path: ['creation'], value: { method: 'pontos', base: { agi: 2 } } }]);
+    expect((await dataOf(id)).creation).toEqual({ method: 'pontos', base: { agi: 2 } });
   });
 
   it('recusa caminhos fora da ficha e lotes inválidos', async () => {

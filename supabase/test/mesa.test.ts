@@ -18,12 +18,14 @@ describe('contas', () => {
     const id = await createUser('Leitor');
     const rows = await as(id, (q) =>
       q<{ slug: string; version: number }>(
-        `select t.slug, v.version from public.templates t join public.template_versions v on v.template_id = t.id order by t.slug`,
+        `select t.slug, v.version from public.templates t join public.template_versions v on v.template_id = t.id order by t.slug, v.version`,
       ),
     );
     expect(rows).toEqual([
       { slug: 'ordem_paranormal', version: 1 },
+      { slug: 'ordem_paranormal', version: 2 },
       { slug: 'tormenta20', version: 1 },
+      { slug: 'tormenta20', version: 2 },
     ]);
   });
 

@@ -1,19 +1,15 @@
-import { Sheet, type CharacterOp } from '@rpg/engine';
 import { AlertTriangle, ChevronDown, Info } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
-import { useCampaign } from '../api/campaigns';
-import { useCharacter, useCharacterData, useCharacterItems, useTemplateVersion } from '../api/characters';
-import { useCampaignRealtime } from '../api/realtime';
-import { useUserId } from '../auth/AuthProvider';
 import { Card, ErrorNote, Spinner, cx } from '../components/ui';
 import { friendlyError } from '../lib/errors';
-import { SheetContext, type SheetCtx } from '../sheet/context';
+import { SheetContext } from '../sheet/context';
+import { useSheetSetup } from '../sheet/useSheetSetup';
 import { FieldView } from '../sheet/FieldView';
+import { PortraitImage } from '../sheet/Portrait';
 import { ResourceField } from '../sheet/Resource';
 import { SyncBadge } from '../sheet/SyncBadge';
-import { outbox } from '../sync';
 
 function Section({ label, collapsible, children }: { label: string; collapsible?: boolean; children: React.ReactNode }) {
   const [open, setOpen] = useState(true);
@@ -35,26 +31,13 @@ function Section({ label, collapsible, children }: { label: string; collapsible?
 export function CharacterSheet() {
   const { id: campaignId = '', charId = '' } = useParams();
   const { t } = useTranslation();
-  const userId = useUserId();
-  useCampaignRealtime(campaignId, userId);
-  const campaign = useCampaign(campaignId);
-  const character = useCharacter(charId);
-  const template = useTemplateVersion(character.data?.template_version_id);
-  const items = useCharacterItems(charId);
-  const data = useCharacterData(character.data);
+  const { ctx, row, loading, error, campaign } = useSheetSetup(campaignId, charId);
   const [tab, setTab] = useState(0);
   const [showWarnings, setShowWarnings] = useState(false);
+  const warnings = useMemo(() => ctx?.sheet.warnings() ?? [], [ctx?.sheet]);
 
-  const change = useCallback((ops: CharacterOp[]) => outbox.enqueue(charId, ops), [charId]);
-  const sheet = useMemo(
-    () => (template.data && data ? new Sheet(template.data, data, items.data ?? []) : null),
-    [template.data, data, items.data],
-  );
-  const warnings = useMemo(() => sheet?.warnings() ?? [], [sheet]);
-
-  if (character.isPending || template.isPending || (character.data && !sheet && !template.error)) return <Spinner label={t('common.loading')} />;
-  const error = character.error ?? template.error;
-  if (error || !character.data || !sheet || !template.data || !data) {
+  if (loading) return <Spinner label={t('common.loading')} />;
+  if (error || !ctx || !row) {
     return (
       <>
         <ErrorNote>{error ? friendlyError(error) : t('errors.notFound')}</ErrorNote>
@@ -65,17 +48,8 @@ export function CharacterSheet() {
     );
   }
 
-  const row = character.data;
-  const isGm = campaign.data?.members.some((m) => m.user_id === userId && m.role === 'gm') ?? false;
-  const ctx: SheetCtx = {
-    compiled: template.data,
-    sheet,
-    data,
-    canEdit: row.owner_id === userId || isGm,
-    change,
-    characterId: charId,
-    campaignId,
-  };
+  const { compiled, sheet, data } = ctx;
+  const template = { data: compiled };
   const tabs = template.data.template.layout.tabs;
   const current = tabs[Math.min(tab, tabs.length - 1)]!;
   const name = (typeof data.values.nome === 'string' && data.values.nome) || row.name || '—';
@@ -91,17 +65,25 @@ export function CharacterSheet() {
     <SheetContext.Provider value={ctx}>
       <div className="flex items-center justify-between gap-2">
         <Link to={`/mesas/${campaignId}`} className="text-accent">
-          ← {campaign.data?.name ?? t('common.back')}
+          ← {campaign?.name ?? t('common.back')}
         </Link>
         <SyncBadge />
       </div>
 
-      <header>
-        <h1 className="font-display text-2xl font-semibold">{name}</h1>
-        <p className="text-sm text-muted">
-          {[summary, template.data.template.name].filter(Boolean).join(' · ')}
-          {!ctx.canEdit && <span> · {t('sheet.readOnly')}</span>}
-        </p>
+      <header className="flex items-center gap-3">
+        <PortraitImage path={row.portrait_path} name={name} className="size-16" />
+        <div className="min-w-0">
+          <h1 className="truncate font-display text-2xl font-semibold">{name}</h1>
+          <p className="text-sm text-muted">
+            {[summary, template.data.template.name].filter(Boolean).join(' · ')}
+            {!ctx.canEdit && <span> · {t('sheet.readOnly')}</span>}
+          </p>
+          {row.status === 'draft' && ctx.canEdit && (
+            <Link to={`/mesas/${campaignId}/personagens/${charId}/criar`} className="text-sm text-accent underline">
+              {t('creation.continue')}
+            </Link>
+          )}
+        </div>
       </header>
 
       {resources.length > 0 && (

@@ -37,6 +37,8 @@ export interface CharacterListItem {
   kind: CharacterRow['kind'];
   owner_id: string;
   visibility: CharacterRow['visibility'];
+  status: CharacterRow['status'];
+  portrait_path: string | null;
   owner: { display_name: string } | null;
 }
 
@@ -73,7 +75,9 @@ async function fetchCharacter(id: string): Promise<CharacterRow | null> {
  */
 export function acceptServerRow(row: CharacterRow) {
   queryClient.setQueryData<CharacterRow | null>(characterKeys.one(row.id), (prev) => {
-    if (prev && prev.version >= row.version) return prev;
+    if (prev && prev.version > row.version) return prev;
+    // Mesma versão = mesmos dados; só aceita se for metadado mais novo (retrato, status, nome).
+    if (prev && prev.version === row.version && row.updated_at <= prev.updated_at) return prev;
     void localDb.characters.put(row as unknown as CharacterRow & Record<string, unknown>);
     return row;
   });
@@ -104,7 +108,7 @@ export function useCharacters(campaignId: string) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('characters')
-        .select('id, name, nome:data->values->>nome, kind, owner_id, visibility, owner:profiles(display_name)')
+        .select('id, name, nome:data->values->>nome, kind, owner_id, visibility, status, portrait_path, owner:profiles(display_name)')
         .eq('campaign_id', campaignId)
         .eq('is_library', false)
         .order('created_at');
@@ -198,6 +202,18 @@ export function useDeleteCharacter(campaignId: string) {
       await localDb.characters.delete(id);
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: characterKeys.list(campaignId) }),
+  });
+}
+
+/** Muda status, retrato ou nome (colunas fora de `data`, que não passam pela fila). */
+export function useUpdateCharacterMeta(id: string) {
+  return useMutation({
+    mutationFn: async (patch: Partial<Pick<CharacterRow, 'status' | 'portrait_path' | 'name'>>) => {
+      const { data, error } = await supabase.from('characters').update(patch).eq('id', id).select(COLUMNS).single();
+      if (error) throw error;
+      return data as unknown as CharacterRow;
+    },
+    onSuccess: (row) => acceptServerRow(row),
   });
 }
 

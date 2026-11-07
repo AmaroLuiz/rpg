@@ -65,6 +65,7 @@ async function setNumber(page, label, value) {
   await pl.getByRole('button', { name: 'Novo personagem' }).click();
   await pl.getByLabel('Nome do personagem').fill('Elena');
   await pl.getByRole('button', { name: 'Criar ficha' }).click();
+  await pl.getByRole('button', { name: 'Pular para a ficha (modo livre)' }).click();
   await pl.getByRole('heading', { name: 'Elena' }).waitFor();
   const sheetUrl = pl.url();
   await pl.getByRole('button', { name: '2 avisos' }).click();

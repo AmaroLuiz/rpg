@@ -15,7 +15,7 @@
     "db:start": "supabase start -x studio,imgproxy,vector,logflare,supavisor,edge-runtime,postgres-meta",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local --schema public > apps/web/src/lib/database.types.ts",
-    "e2e": "node apps/web/e2e/mesa.e2e.cjs && node apps/web/e2e/ficha.e2e.cjs"
+    "e2e": "node apps/web/e2e/mesa.e2e.cjs && node apps/web/e2e/ficha.e2e.cjs && node apps/web/e2e/criacao.e2e.cjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",

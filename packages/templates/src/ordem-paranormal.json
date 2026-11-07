@@ -1,7 +1,7 @@
 {
   "id": "ordem_paranormal",
   "name": "Ordem Paranormal",
-  "version": 1,
+  "version": 2,
   "description": "Template para Ordem Paranormal RPG. Traz estrutura e números mecânicos; textos de origens, poderes e rituais ficam a cargo da mesa. Confira os números com o livro antes de usar.",
   "fields": [
     {
@@ -911,6 +911,42 @@
       "level": "info"
     }
   ],
+  "creation": {
+    "attributes": {
+      "fields": [
+        "agi",
+        "for",
+        "int",
+        "pre",
+        "vig"
+      ],
+      "methods": [
+        {
+          "id": "pontos",
+          "label": "Distribuir pontos",
+          "kind": "pointBuy",
+          "base": 1,
+          "budget": 4,
+          "min": 0,
+          "max": 3,
+          "cost": {
+            "0": -1,
+            "1": 0,
+            "2": 1,
+            "3": 2
+          },
+          "maxBelowBase": 1,
+          "description": "Todos começam em 1. Você tem 4 pontos; cada ponto sobe um atributo em 1, até 3. Baixar um atributo para 0 devolve 1 ponto."
+        },
+        {
+          "id": "manual",
+          "label": "Valores manuais",
+          "kind": "manual",
+          "description": "Digite os atributos direto, como a mesa combinou."
+        }
+      ]
+    }
+  },
   "initiative": "iniciativa",
   "layout": {
     "tabs": [

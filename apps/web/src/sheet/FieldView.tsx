@@ -1,16 +1,15 @@
-import { useTranslation } from 'react-i18next';
 import { useSheetCtx } from './context';
 import { ConditionsField } from './Conditions';
 import { NumberInput, Row, selectOptions, SelectInput, TextInput, Toggle, ValueWithBreakdown } from './fields';
 import { InventoryField } from './Inventory';
 import { ListField } from './ListField';
 import { NotesField } from './Notes';
+import { PortraitPicker } from './Portrait';
 import { ResourceField } from './Resource';
 
 /** Desenha um item do layout do template: campo, lista ou bloco especial ($conditions, $inventory, $notes). */
 export function FieldView({ id }: { id: string }) {
-  const { t } = useTranslation();
-  const { compiled, sheet, data, canEdit, change, campaignId } = useSheetCtx();
+  const { compiled, sheet, data, canEdit, change, campaignId, characterId: ctxCharacterId } = useSheetCtx();
 
   if (id === '$conditions') return <ConditionsField />;
   if (id === '$inventory') return <InventoryField />;
@@ -77,6 +76,6 @@ export function FieldView({ id }: { id: string }) {
         </Row>
       );
     case 'image':
-      return <p className="py-2 text-sm text-muted">{t('sheet.portraitSoon')}</p>;
+      return <PortraitPicker campaignId={campaignId} characterId={ctxCharacterId} canEdit={canEdit} />;
   }
 }

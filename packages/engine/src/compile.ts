@@ -337,6 +337,41 @@ export function compileTemplate(input: unknown): { compiled?: CompiledTemplate; 
     }),
   );
 
+  // Criação: atributos existem e são números; rolagens e conversões são válidas.
+  const attrs = t.creation?.attributes;
+  if (attrs) {
+    for (const f of attrs.fields) {
+      const def = c.fields.get(f);
+      if (!def || def.type !== 'number') issue(`creation.attributes.fields`, `${f} precisa ser um campo numérico`);
+    }
+    uniqueIds(attrs.methods.map((m) => m.id), 'creation.attributes.methods', issue);
+    for (const m of attrs.methods) {
+      const p = `creation.attributes.methods.${m.id}`;
+      if (m.kind === 'pointBuy') {
+        if (m.min > m.max) issue(p, 'min maior que max');
+        for (let v = m.min; v <= m.max; v++) if (!(String(v) in m.cost)) issue(`${p}.cost`, `Falta o custo do valor ${v}`);
+        if (!(String(m.base) in m.cost)) issue(`${p}.cost`, `Falta o custo do valor de partida ${m.base}`);
+      }
+      if (m.kind === 'roll') {
+        try {
+          parse(m.expr);
+        } catch (e) {
+          issue(`${p}.expr`, (e as Error).message);
+        }
+        if (m.convert) {
+          try {
+            walk(parse(m.convert), (n) => {
+              if (n.type === 'ref' && (n.path.length !== 1 || n.path[0] !== 'valor')) issue(`${p}.convert`, 'A conversão só pode usar @valor');
+              if (n.type === 'dice') issue(`${p}.convert`, 'A conversão não rola dados');
+            });
+          } catch (e) {
+            issue(`${p}.convert`, (e as Error).message);
+          }
+        }
+      }
+    }
+  }
+
   k.cycles();
   return { compiled: c, issues: k.issues };
 }
