@@ -21,7 +21,8 @@ export interface Evaluation {
   dice: DiceGroupResult[];
 }
 
-type Out = { v: Value; s: string };
+/** `atom`: o texto é um termo único e dispensa parênteses. */
+type Out = { v: Value; s: string; atom?: boolean };
 
 const ARITH = new Set(['+', '-', '*', '/', '%', '^']);
 
@@ -133,18 +134,20 @@ class Evaluator {
   run(node: Node): Out {
     switch (node.type) {
       case 'num':
-        return { v: node.value, s: format(node.value) };
+        return { v: node.value, s: format(node.value), atom: true };
       case 'str':
-        return { v: node.value, s: JSON.stringify(node.value) };
+        return { v: node.value, s: JSON.stringify(node.value), atom: true };
       case 'bool':
-        return { v: node.value, s: String(node.value) };
+        return { v: node.value, s: String(node.value), atom: true };
+      case 'null':
+        return { v: null, s: 'null', atom: true };
       case 'ref': {
         const v = this.ctx.ref(node.path);
-        return { v, s: format(v) };
+        return { v, s: format(v), atom: true };
       }
       case 'group': {
         const inner = this.run(node.expr);
-        return { v: inner.v, s: `(${inner.s})` };
+        return inner.atom ? inner : { v: inner.v, s: `(${inner.s})`, atom: true };
       }
       case 'unary': {
         const arg = this.run(node.arg);
@@ -219,7 +222,7 @@ class Evaluator {
         const count = this.run(node.count);
         const group = rollGroup(toNumber(count.v, 'quantidade de dados'), node.sides, node.mods, this.ctx.rng);
         this.dice.push(group);
-        return { v: group.value, s: describeGroup(group) };
+        return { v: group.value, s: describeGroup(group), atom: true };
       }
     }
   }

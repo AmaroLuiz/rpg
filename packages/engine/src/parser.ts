@@ -243,6 +243,7 @@ class Parser {
         return { type: 'dice', count: { type: 'num', value: t.count }, sides: t.sides, mods: t.mods };
       case 'ident': {
         if (t.value === 'true' || t.value === 'false') return { type: 'bool', value: t.value === 'true' };
+        if (t.value === 'null') return { type: 'null' };
         if (this.isOp('(')) {
           this.next();
           const args: Node[] = [];

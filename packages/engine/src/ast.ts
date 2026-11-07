@@ -23,6 +23,7 @@ export type Node =
   | { type: 'num'; value: number }
   | { type: 'str'; value: string }
   | { type: 'bool'; value: boolean }
+  | { type: 'null' }
   | { type: 'ref'; path: string[] }
   | { type: 'unary'; op: UnaryOp; arg: Node }
   | { type: 'binary'; op: BinaryOp; left: Node; right: Node }

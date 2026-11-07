@@ -1,0 +1,1177 @@
+{
+  "id": "tormenta20",
+  "name": "Tormenta20 (Jogo do Ano)",
+  "version": 1,
+  "description": "Template para Tormenta20, edição Jogo do Ano (atributos usados direto como bônus). Traz estrutura e números mecânicos; textos de raças, origens, poderes e magias ficam a cargo da mesa. Uma classe por personagem. Confira os números com o livro antes de usar.",
+  "fields": [
+    {
+      "id": "nome",
+      "label": "Nome",
+      "type": "text"
+    },
+    {
+      "id": "jogador",
+      "label": "Jogador",
+      "type": "text"
+    },
+    {
+      "id": "raca",
+      "label": "Raça",
+      "type": "text"
+    },
+    {
+      "id": "origem",
+      "label": "Origem",
+      "type": "text"
+    },
+    {
+      "id": "classe",
+      "label": "Classe",
+      "type": "select",
+      "catalog": "classes"
+    },
+    {
+      "id": "divindade",
+      "label": "Divindade",
+      "type": "text"
+    },
+    {
+      "id": "nivel",
+      "label": "Nível",
+      "type": "number",
+      "default": 1,
+      "min": 1,
+      "max": 20
+    },
+    {
+      "id": "for",
+      "label": "Força",
+      "type": "number",
+      "default": 0,
+      "min": -5
+    },
+    {
+      "id": "des",
+      "label": "Destreza",
+      "type": "number",
+      "default": 0,
+      "min": -5
+    },
+    {
+      "id": "con",
+      "label": "Constituição",
+      "type": "number",
+      "default": 0,
+      "min": -5
+    },
+    {
+      "id": "int",
+      "label": "Inteligência",
+      "type": "number",
+      "default": 0,
+      "min": -5
+    },
+    {
+      "id": "sab",
+      "label": "Sabedoria",
+      "type": "number",
+      "default": 0,
+      "min": -5
+    },
+    {
+      "id": "car",
+      "label": "Carisma",
+      "type": "number",
+      "default": 0,
+      "min": -5
+    },
+    {
+      "id": "meioNivel",
+      "label": "Metade do nível",
+      "type": "computed",
+      "formula": "floor(@nivel / 2)"
+    },
+    {
+      "id": "treino",
+      "label": "Bônus de treinamento",
+      "type": "computed",
+      "formula": "lookup(@nivel, 1, 2, 7, 4, 15, 6)"
+    },
+    {
+      "id": "pv",
+      "label": "Pontos de Vida",
+      "type": "resource",
+      "color": "red",
+      "min": -10,
+      "allowTemp": true,
+      "max": "@classe.pvInicial + @con + (@nivel - 1) * (@classe.pvPorNivel + @con)"
+    },
+    {
+      "id": "pm",
+      "label": "Pontos de Mana",
+      "type": "resource",
+      "color": "blue",
+      "max": "@classe.pmPorNivel * @nivel"
+    },
+    {
+      "id": "defesa",
+      "label": "Defesa",
+      "type": "computed",
+      "formula": "10 + @des"
+    },
+    {
+      "id": "deslocamento",
+      "label": "Deslocamento (m)",
+      "type": "number",
+      "default": 9
+    },
+    {
+      "id": "atributoMagia",
+      "label": "Atributo de magia",
+      "type": "select",
+      "options": [
+        {
+          "value": "int",
+          "label": "Inteligência"
+        },
+        {
+          "value": "sab",
+          "label": "Sabedoria"
+        },
+        {
+          "value": "car",
+          "label": "Carisma"
+        }
+      ],
+      "default": "int"
+    },
+    {
+      "id": "cdMagia",
+      "label": "CD de magias",
+      "type": "computed",
+      "formula": "10 + @meioNivel + field(@atributoMagia)"
+    },
+    {
+      "id": "carga",
+      "label": "Carga (espaços)",
+      "type": "computed",
+      "formula": "sum(@itens.espacos * @itens.quantidade)"
+    },
+    {
+      "id": "capacidade",
+      "label": "Capacidade (espaços)",
+      "type": "computed",
+      "formula": "10 + 2 * @for"
+    },
+    {
+      "id": "tibares",
+      "label": "Tibares (T$)",
+      "type": "number",
+      "default": 0,
+      "min": 0
+    },
+    {
+      "id": "aparencia",
+      "label": "Aparência",
+      "type": "longtext"
+    },
+    {
+      "id": "historia",
+      "label": "História",
+      "type": "longtext"
+    },
+    {
+      "id": "retrato",
+      "label": "Retrato",
+      "type": "image"
+    },
+    {
+      "id": "anotacoes",
+      "label": "Anotações",
+      "type": "longtext"
+    }
+  ],
+  "lists": [
+    {
+      "id": "pericias",
+      "label": "Perícias",
+      "titleField": "nome",
+      "fields": [
+        {
+          "id": "nome",
+          "label": "Perícia",
+          "type": "text"
+        },
+        {
+          "id": "atributo",
+          "label": "Atributo",
+          "type": "select",
+          "options": [
+            {
+              "value": "for",
+              "label": "FOR"
+            },
+            {
+              "value": "des",
+              "label": "DES"
+            },
+            {
+              "value": "con",
+              "label": "CON"
+            },
+            {
+              "value": "int",
+              "label": "INT"
+            },
+            {
+              "value": "sab",
+              "label": "SAB"
+            },
+            {
+              "value": "car",
+              "label": "CAR"
+            }
+          ]
+        },
+        {
+          "id": "treinado",
+          "label": "Treinada",
+          "type": "checkbox",
+          "default": false
+        },
+        {
+          "id": "outros",
+          "label": "Outros",
+          "type": "number",
+          "default": 0
+        },
+        {
+          "id": "bonus",
+          "label": "Bônus",
+          "type": "computed",
+          "formula": "@meioNivel + field(@self.atributo) + (@self.treinado ? @treino : 0) + @self.outros",
+          "format": "signed"
+        }
+      ],
+      "defaultItems": [
+        {
+          "key": "acrobacia",
+          "nome": "Acrobacia",
+          "atributo": "des",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "adestramento",
+          "nome": "Adestramento",
+          "atributo": "car",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "atletismo",
+          "nome": "Atletismo",
+          "atributo": "for",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "atuacao",
+          "nome": "Atuação",
+          "atributo": "car",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "cavalgar",
+          "nome": "Cavalgar",
+          "atributo": "des",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "conhecimento",
+          "nome": "Conhecimento",
+          "atributo": "int",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "cura",
+          "nome": "Cura",
+          "atributo": "sab",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "diplomacia",
+          "nome": "Diplomacia",
+          "atributo": "car",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "enganacao",
+          "nome": "Enganação",
+          "atributo": "car",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "fortitude",
+          "nome": "Fortitude",
+          "atributo": "con",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "furtividade",
+          "nome": "Furtividade",
+          "atributo": "des",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "guerra",
+          "nome": "Guerra",
+          "atributo": "int",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "iniciativa",
+          "nome": "Iniciativa",
+          "atributo": "des",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "intimidacao",
+          "nome": "Intimidação",
+          "atributo": "car",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "intuicao",
+          "nome": "Intuição",
+          "atributo": "sab",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "investigacao",
+          "nome": "Investigação",
+          "atributo": "int",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "jogatina",
+          "nome": "Jogatina",
+          "atributo": "car",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "ladinagem",
+          "nome": "Ladinagem",
+          "atributo": "des",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "luta",
+          "nome": "Luta",
+          "atributo": "for",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "misticismo",
+          "nome": "Misticismo",
+          "atributo": "int",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "nobreza",
+          "nome": "Nobreza",
+          "atributo": "int",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "oficio",
+          "nome": "Ofício",
+          "atributo": "int",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "percepcao",
+          "nome": "Percepção",
+          "atributo": "sab",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "pilotagem",
+          "nome": "Pilotagem",
+          "atributo": "des",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "pontaria",
+          "nome": "Pontaria",
+          "atributo": "des",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "reflexos",
+          "nome": "Reflexos",
+          "atributo": "des",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "religiao",
+          "nome": "Religião",
+          "atributo": "sab",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "sobrevivencia",
+          "nome": "Sobrevivência",
+          "atributo": "sab",
+          "treinado": false,
+          "outros": 0
+        },
+        {
+          "key": "vontade",
+          "nome": "Vontade",
+          "atributo": "sab",
+          "treinado": false,
+          "outros": 0
+        }
+      ]
+    },
+    {
+      "id": "ataques",
+      "label": "Ataques",
+      "titleField": "nome",
+      "fields": [
+        {
+          "id": "nome",
+          "label": "Arma",
+          "type": "text"
+        },
+        {
+          "id": "pericia",
+          "label": "Perícia",
+          "type": "select",
+          "options": [
+            {
+              "value": "luta",
+              "label": "Luta"
+            },
+            {
+              "value": "pontaria",
+              "label": "Pontaria"
+            }
+          ],
+          "default": "luta"
+        },
+        {
+          "id": "bonusAtaque",
+          "label": "Bônus de ataque",
+          "type": "number",
+          "default": 0
+        },
+        {
+          "id": "dano",
+          "label": "Dano",
+          "type": "text"
+        },
+        {
+          "id": "critico",
+          "label": "Crítico",
+          "type": "text"
+        },
+        {
+          "id": "tipoDano",
+          "label": "Tipo",
+          "type": "text"
+        },
+        {
+          "id": "alcance",
+          "label": "Alcance",
+          "type": "text"
+        },
+        {
+          "id": "bonus",
+          "label": "Bônus",
+          "type": "computed",
+          "formula": "(@self.pericia == \"pontaria\" ? @pericias.pontaria.bonus : @pericias.luta.bonus) + @self.bonusAtaque",
+          "format": "signed"
+        }
+      ]
+    },
+    {
+      "id": "magias",
+      "label": "Magias",
+      "titleField": "nome",
+      "fields": [
+        {
+          "id": "nome",
+          "label": "Magia",
+          "type": "text"
+        },
+        {
+          "id": "tipo",
+          "label": "Tipo",
+          "type": "select",
+          "options": [
+            {
+              "value": "arcana",
+              "label": "Arcana"
+            },
+            {
+              "value": "divina",
+              "label": "Divina"
+            },
+            {
+              "value": "universal",
+              "label": "Universal"
+            }
+          ]
+        },
+        {
+          "id": "circulo",
+          "label": "Círculo",
+          "type": "select",
+          "options": [
+            {
+              "value": 1,
+              "label": "1º"
+            },
+            {
+              "value": 2,
+              "label": "2º"
+            },
+            {
+              "value": 3,
+              "label": "3º"
+            },
+            {
+              "value": 4,
+              "label": "4º"
+            },
+            {
+              "value": 5,
+              "label": "5º"
+            }
+          ],
+          "default": 1
+        },
+        {
+          "id": "custo",
+          "label": "Custo (PM)",
+          "type": "computed",
+          "formula": "lookup(@self.circulo, 1, 1, 2, 3, 3, 6, 4, 10, 5, 15)"
+        },
+        {
+          "id": "escola",
+          "label": "Escola",
+          "type": "text"
+        },
+        {
+          "id": "execucao",
+          "label": "Execução",
+          "type": "text"
+        },
+        {
+          "id": "alcance",
+          "label": "Alcance",
+          "type": "text"
+        },
+        {
+          "id": "descricao",
+          "label": "Descrição",
+          "type": "longtext"
+        }
+      ]
+    },
+    {
+      "id": "poderes",
+      "label": "Poderes",
+      "titleField": "nome",
+      "fields": [
+        {
+          "id": "nome",
+          "label": "Poder",
+          "type": "text"
+        },
+        {
+          "id": "descricao",
+          "label": "Descrição",
+          "type": "longtext"
+        }
+      ]
+    }
+  ],
+  "catalogs": [
+    {
+      "id": "classes",
+      "label": "Classes",
+      "options": [
+        {
+          "id": "arcanista",
+          "label": "Arcanista",
+          "values": {
+            "pvInicial": 8,
+            "pvPorNivel": 2,
+            "pmPorNivel": 6
+          }
+        },
+        {
+          "id": "barbaro",
+          "label": "Bárbaro",
+          "values": {
+            "pvInicial": 24,
+            "pvPorNivel": 6,
+            "pmPorNivel": 3
+          }
+        },
+        {
+          "id": "bardo",
+          "label": "Bardo",
+          "values": {
+            "pvInicial": 12,
+            "pvPorNivel": 3,
+            "pmPorNivel": 4
+          }
+        },
+        {
+          "id": "bucaneiro",
+          "label": "Bucaneiro",
+          "values": {
+            "pvInicial": 16,
+            "pvPorNivel": 4,
+            "pmPorNivel": 3
+          }
+        },
+        {
+          "id": "cacador",
+          "label": "Caçador",
+          "values": {
+            "pvInicial": 16,
+            "pvPorNivel": 4,
+            "pmPorNivel": 4
+          }
+        },
+        {
+          "id": "cavaleiro",
+          "label": "Cavaleiro",
+          "values": {
+            "pvInicial": 20,
+            "pvPorNivel": 5,
+            "pmPorNivel": 3
+          }
+        },
+        {
+          "id": "clerigo",
+          "label": "Clérigo",
+          "values": {
+            "pvInicial": 16,
+            "pvPorNivel": 4,
+            "pmPorNivel": 5
+          }
+        },
+        {
+          "id": "druida",
+          "label": "Druida",
+          "values": {
+            "pvInicial": 16,
+            "pvPorNivel": 4,
+            "pmPorNivel": 4
+          }
+        },
+        {
+          "id": "guerreiro",
+          "label": "Guerreiro",
+          "values": {
+            "pvInicial": 20,
+            "pvPorNivel": 5,
+            "pmPorNivel": 3
+          }
+        },
+        {
+          "id": "inventor",
+          "label": "Inventor",
+          "values": {
+            "pvInicial": 12,
+            "pvPorNivel": 3,
+            "pmPorNivel": 4
+          }
+        },
+        {
+          "id": "ladino",
+          "label": "Ladino",
+          "values": {
+            "pvInicial": 12,
+            "pvPorNivel": 3,
+            "pmPorNivel": 4
+          }
+        },
+        {
+          "id": "lutador",
+          "label": "Lutador",
+          "values": {
+            "pvInicial": 20,
+            "pvPorNivel": 5,
+            "pmPorNivel": 3
+          }
+        },
+        {
+          "id": "nobre",
+          "label": "Nobre",
+          "values": {
+            "pvInicial": 16,
+            "pvPorNivel": 4,
+            "pmPorNivel": 4
+          }
+        },
+        {
+          "id": "paladino",
+          "label": "Paladino",
+          "values": {
+            "pvInicial": 20,
+            "pvPorNivel": 5,
+            "pmPorNivel": 3
+          }
+        }
+      ]
+    }
+  ],
+  "conditions": [
+    {
+      "id": "abalado",
+      "label": "Abalado",
+      "modifiers": [
+        {
+          "target": "teste_pericia",
+          "value": -2
+        }
+      ]
+    },
+    {
+      "id": "apavorado",
+      "label": "Apavorado",
+      "modifiers": [
+        {
+          "target": "teste_pericia",
+          "value": -5
+        }
+      ]
+    },
+    {
+      "id": "desprevenido",
+      "label": "Desprevenido",
+      "modifiers": [
+        {
+          "target": "defesa",
+          "value": -5
+        },
+        {
+          "target": "pericias.reflexos.bonus",
+          "value": -5
+        }
+      ]
+    },
+    {
+      "id": "vulneravel",
+      "label": "Vulnerável",
+      "modifiers": [
+        {
+          "target": "defesa",
+          "value": -2
+        }
+      ]
+    },
+    {
+      "id": "caido",
+      "label": "Caído"
+    },
+    {
+      "id": "cego",
+      "label": "Cego"
+    },
+    {
+      "id": "confuso",
+      "label": "Confuso"
+    },
+    {
+      "id": "enjoado",
+      "label": "Enjoado"
+    },
+    {
+      "id": "enredado",
+      "label": "Enredado"
+    },
+    {
+      "id": "fatigado",
+      "label": "Fatigado"
+    },
+    {
+      "id": "exausto",
+      "label": "Exausto"
+    },
+    {
+      "id": "fraco",
+      "label": "Fraco"
+    },
+    {
+      "id": "lento",
+      "label": "Lento"
+    },
+    {
+      "id": "sangrando",
+      "label": "Sangrando"
+    },
+    {
+      "id": "atordoado",
+      "label": "Atordoado"
+    },
+    {
+      "id": "paralisado",
+      "label": "Paralisado"
+    },
+    {
+      "id": "inconsciente",
+      "label": "Inconsciente"
+    }
+  ],
+  "rolls": [
+    {
+      "id": "pericia",
+      "label": "{@self.nome}",
+      "list": "pericias",
+      "category": "pericias",
+      "expr": "1d20 + @self.bonus + mod(\"teste_pericia\")"
+    },
+    {
+      "id": "teste_for",
+      "label": "Força",
+      "category": "atributos",
+      "expr": "1d20 + @for"
+    },
+    {
+      "id": "teste_des",
+      "label": "Destreza",
+      "category": "atributos",
+      "expr": "1d20 + @des"
+    },
+    {
+      "id": "teste_con",
+      "label": "Constituição",
+      "category": "atributos",
+      "expr": "1d20 + @con"
+    },
+    {
+      "id": "teste_int",
+      "label": "Inteligência",
+      "category": "atributos",
+      "expr": "1d20 + @int"
+    },
+    {
+      "id": "teste_sab",
+      "label": "Sabedoria",
+      "category": "atributos",
+      "expr": "1d20 + @sab"
+    },
+    {
+      "id": "teste_car",
+      "label": "Carisma",
+      "category": "atributos",
+      "expr": "1d20 + @car"
+    },
+    {
+      "id": "iniciativa",
+      "label": "Iniciativa",
+      "category": "combate",
+      "expr": "1d20 + @pericias.iniciativa.bonus + mod(\"teste_pericia\")"
+    },
+    {
+      "id": "ataque",
+      "label": "Ataque: {@self.nome}",
+      "list": "ataques",
+      "category": "combate",
+      "expr": "1d20 + @self.bonus"
+    },
+    {
+      "id": "dano",
+      "label": "Dano: {@self.nome}",
+      "list": "ataques",
+      "category": "combate",
+      "expr": "roll(@self.dano)"
+    }
+  ],
+  "inventory": {
+    "fields": [
+      {
+        "id": "espacos",
+        "label": "Espaços",
+        "type": "number",
+        "default": 1,
+        "min": 0
+      },
+      {
+        "id": "preco",
+        "label": "Preço (T$)",
+        "type": "number",
+        "default": 0,
+        "min": 0
+      },
+      {
+        "id": "descricao",
+        "label": "Descrição",
+        "type": "longtext"
+      }
+    ],
+    "loadField": "carga",
+    "capacityField": "capacidade"
+  },
+  "validations": [
+    {
+      "id": "sobrecarga",
+      "when": "@carga > @capacidade",
+      "message": "Sobrecarregado: {@carga} de {@capacidade} espaços."
+    },
+    {
+      "id": "sem_classe",
+      "when": "@classe == null",
+      "message": "Escolha uma classe para calcular PV e PM.",
+      "level": "info"
+    }
+  ],
+  "initiative": "iniciativa",
+  "layout": {
+    "tabs": [
+      {
+        "id": "personagem",
+        "label": "Personagem",
+        "sections": [
+          {
+            "id": "identidade",
+            "label": "Identidade",
+            "collapsible": true,
+            "items": [
+              "nome",
+              "jogador",
+              "raca",
+              "origem",
+              "classe",
+              "divindade",
+              "nivel"
+            ]
+          },
+          {
+            "id": "atributos",
+            "label": "Atributos",
+            "items": [
+              "for",
+              "des",
+              "con",
+              "int",
+              "sab",
+              "car",
+              "$rolls:atributos"
+            ]
+          },
+          {
+            "id": "recursos",
+            "label": "Recursos",
+            "items": [
+              "pv",
+              "pm"
+            ]
+          },
+          {
+            "id": "defesas",
+            "label": "Combate",
+            "items": [
+              "defesa",
+              "deslocamento",
+              "$conditions"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "pericias",
+        "label": "Perícias",
+        "sections": [
+          {
+            "id": "lista",
+            "label": "Perícias",
+            "items": [
+              "meioNivel",
+              "treino",
+              "pericias"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "combate",
+        "label": "Combate",
+        "sections": [
+          {
+            "id": "ataques",
+            "label": "Ataques",
+            "items": [
+              "ataques",
+              "$rolls:combate"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "magias",
+        "label": "Magias",
+        "sections": [
+          {
+            "id": "magias",
+            "label": "Magias",
+            "items": [
+              "atributoMagia",
+              "cdMagia",
+              "magias"
+            ]
+          },
+          {
+            "id": "poderes",
+            "label": "Poderes",
+            "items": [
+              "poderes"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "inventario",
+        "label": "Inventário",
+        "sections": [
+          {
+            "id": "itens",
+            "label": "Itens",
+            "items": [
+              "tibares",
+              "carga",
+              "capacidade",
+              "$inventory"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "notas",
+        "label": "Notas",
+        "sections": [
+          {
+            "id": "descricao",
+            "label": "Descrição",
+            "items": [
+              "retrato",
+              "aparencia",
+              "historia"
+            ]
+          },
+          {
+            "id": "anotacoes",
+            "label": "Anotações",
+            "items": [
+              "anotacoes",
+              "$notes"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "wizard": {
+    "steps": [
+      {
+        "id": "conceito",
+        "label": "Conceito",
+        "items": [
+          "nome",
+          "jogador"
+        ]
+      },
+      {
+        "id": "raca",
+        "label": "Raça",
+        "description": "Aplique os modificadores de atributo da raça direto nos atributos.",
+        "items": [
+          "raca"
+        ]
+      },
+      {
+        "id": "classe",
+        "label": "Classe",
+        "items": [
+          "classe",
+          "divindade"
+        ]
+      },
+      {
+        "id": "atributos",
+        "label": "Atributos",
+        "items": [
+          "for",
+          "des",
+          "con",
+          "int",
+          "sab",
+          "car"
+        ]
+      },
+      {
+        "id": "origem",
+        "label": "Origem",
+        "items": [
+          "origem"
+        ]
+      },
+      {
+        "id": "pericias",
+        "label": "Perícias",
+        "items": [
+          "pericias"
+        ]
+      },
+      {
+        "id": "equipamento",
+        "label": "Equipamento",
+        "items": [
+          "tibares",
+          "$inventory"
+        ]
+      },
+      {
+        "id": "detalhes",
+        "label": "Detalhes",
+        "items": [
+          "retrato",
+          "aparencia",
+          "historia"
+        ]
+      }
+    ]
+  }
+}
