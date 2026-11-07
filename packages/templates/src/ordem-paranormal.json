@@ -1,7 +1,7 @@
 {
   "id": "ordem_paranormal",
   "name": "Ordem Paranormal",
-  "version": 2,
+  "version": 3,
   "description": "Template para Ordem Paranormal RPG. Traz estrutura e números mecânicos; textos de origens, poderes e rituais ficam a cargo da mesa. Confira os números com o livro antes de usar.",
   "fields": [
     {
@@ -947,6 +947,53 @@
       ]
     }
   },
+  "progression": {
+    "field": "nex",
+    "label": "Subir NEX",
+    "values": [
+      5,
+      10,
+      15,
+      20,
+      25,
+      30,
+      35,
+      40,
+      45,
+      50,
+      55,
+      60,
+      65,
+      70,
+      75,
+      80,
+      85,
+      90,
+      95,
+      99
+    ]
+  },
+  "rests": [
+    {
+      "id": "recuperacao_total",
+      "label": "Recuperação total",
+      "description": "Enche PV, PE e Sanidade. Use quando a mesa decidir que o grupo se recuperou por completo.",
+      "restore": [
+        {
+          "resource": "pv",
+          "amount": "full"
+        },
+        {
+          "resource": "pe",
+          "amount": "full"
+        },
+        {
+          "resource": "san",
+          "amount": "full"
+        }
+      ]
+    }
+  ],
   "initiative": "iniciativa",
   "layout": {
     "tabs": [

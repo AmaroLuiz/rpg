@@ -127,3 +127,46 @@ describe('Tormenta20: Guerreiro nível 5', () => {
     expect(s.warnings().filter((w) => w.id.startsWith('pv'))).toEqual([]);
   });
 });
+
+describe('evolução e descanso', () => {
+  it('Ordem Paranormal: NEX 15 → 20 soma ao PV atual o que o máximo cresceu', async () => {
+    const { levelUp, nextProgression } = await import('@rpg/engine');
+    const { tpl, data } = character('ordem_paranormal', { classe: 'combatente', nex: 15, agi: 2, for: 3, int: 1, pre: 1, vig: 2, pv: { atual: 10 } });
+    const s = new Sheet(tpl, data);
+    expect(nextProgression(s)).toBe(20);
+    const up = levelUp(s);
+    expect(up.changes).toEqual([
+      ['NEX (%)', 15, 20],
+      ['Pontos de Vida (máx.)', 34, 40],
+      ['Pontos de Esforço (máx.)', 9, 12],
+      ['Sanidade (máx.)', 18, 21],
+    ]);
+    const after = new Sheet(tpl, applyOps(data, up.ops));
+    expect(after.resource('pv')).toMatchObject({ atual: 16, max: 40 });
+    expect(after.resource('pe')).toMatchObject({ atual: 12, max: 12 }); // estava cheio, continua cheio
+  });
+
+  it('NEX 95 vai para 99, e 99 é o fim', async () => {
+    const { nextProgression } = await import('@rpg/engine');
+    const at = (nex: number) => nextProgression(new Sheet(builtinTemplate('ordem_paranormal'), character('ordem_paranormal', { nex }).data));
+    expect(at(95)).toBe(99);
+    expect(at(99)).toBeNull();
+  });
+
+  it('Tormenta20: descanso normal recupera nível em PV e PM, sem passar do máximo', async () => {
+    const { rest } = await import('@rpg/engine');
+    const { tpl, data } = character('tormenta20', { classe: 'guerreiro', nivel: 5, con: 2, pv: { atual: 30 }, pm: { atual: 13 } });
+    const r = rest(new Sheet(tpl, data), 'descanso_normal');
+    expect(r.changes).toEqual([
+      ['Pontos de Vida', 30, 35],
+      ['Pontos de Mana', 13, 15],
+    ]);
+  });
+
+  it('recuperação total enche tudo; recurso cheio não gera mudança', async () => {
+    const { rest } = await import('@rpg/engine');
+    const { tpl, data } = character('ordem_paranormal', { classe: 'ocultista', pv: { atual: 1 } });
+    const r = rest(new Sheet(tpl, data), 'recuperacao_total');
+    expect(r.changes.map((c) => c[0])).toEqual(['Pontos de Vida']);
+  });
+});

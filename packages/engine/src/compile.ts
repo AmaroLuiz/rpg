@@ -372,6 +372,20 @@ export function compileTemplate(input: unknown): { compiled?: CompiledTemplate; 
     }
   }
 
+  // Evolução e descanso.
+  if (t.progression) {
+    const f = c.fields.get(t.progression.field);
+    if (!f || f.type !== 'number') issue('progression.field', `${t.progression.field} precisa ser um campo numérico`);
+  }
+  uniqueIds(t.rests.map((r) => r.id), 'rests', issue);
+  for (const r of t.rests) {
+    r.restore.forEach((x, i) => {
+      const f = c.fields.get(x.resource);
+      if (!f || f.type !== 'resource') issue(`rests.${r.id}.restore[${i}]`, `${x.resource} precisa ser um recurso`);
+      if (typeof x.amount === 'string' && x.amount !== 'full') k.formula(x.amount, `rests.${r.id}.restore[${i}].amount`);
+    });
+  }
+
   k.cycles();
   return { compiled: c, issues: k.issues };
 }

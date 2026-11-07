@@ -1,7 +1,7 @@
 {
   "id": "tormenta20",
   "name": "Tormenta20 (Jogo do Ano)",
-  "version": 2,
+  "version": 3,
   "description": "Template para Tormenta20, edição Jogo do Ano (atributos usados direto como bônus). Traz estrutura e números mecânicos; textos de raças, origens, poderes e magias ficam a cargo da mesa. Uma classe por personagem. Confira os números com o livro antes de usar.",
   "fields": [
     {
@@ -1008,6 +1008,44 @@
       ]
     }
   },
+  "progression": {
+    "field": "nivel",
+    "label": "Subir de nível",
+    "step": 1,
+    "max": 20
+  },
+  "rests": [
+    {
+      "id": "descanso_normal",
+      "label": "Descanso normal",
+      "description": "Uma noite de sono: recupera PV e PM iguais ao nível.",
+      "restore": [
+        {
+          "resource": "pv",
+          "amount": "@nivel"
+        },
+        {
+          "resource": "pm",
+          "amount": "@nivel"
+        }
+      ]
+    },
+    {
+      "id": "recuperacao_total",
+      "label": "Recuperação total",
+      "description": "Enche PV e PM.",
+      "restore": [
+        {
+          "resource": "pv",
+          "amount": "full"
+        },
+        {
+          "resource": "pm",
+          "amount": "full"
+        }
+      ]
+    }
+  ],
   "initiative": "iniciativa",
   "layout": {
     "tabs": [

@@ -24,8 +24,10 @@ describe('contas', () => {
     expect(rows).toEqual([
       { slug: 'ordem_paranormal', version: 1 },
       { slug: 'ordem_paranormal', version: 2 },
+      { slug: 'ordem_paranormal', version: 3 },
       { slug: 'tormenta20', version: 1 },
       { slug: 'tormenta20', version: 2 },
+      { slug: 'tormenta20', version: 3 },
     ]);
   });
 

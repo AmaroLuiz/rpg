@@ -210,6 +210,25 @@ export const CreationSchema = z.object({
     .optional(),
 });
 
+export const ProgressionSchema = z.object({
+  /** Campo que mede o avanço (nível, NEX). */
+  field: Id,
+  label: z.string().min(1),
+  /** Passo de cada avanço; ignorado se `values` for dado. */
+  step: z.number().positive().default(1),
+  /** Sequência exata de valores (ex.: NEX 5, 10, …, 95, 99). */
+  values: z.array(z.number()).optional(),
+  max: z.number().optional(),
+});
+
+export const RestSchema = z.object({
+  id: Id,
+  label: z.string().min(1),
+  description: z.string().optional(),
+  /** O que volta: "full" enche o recurso; uma fórmula soma ao atual (sem passar do máximo). */
+  restore: z.array(z.object({ resource: Id, amount: z.union([z.literal('full'), Formula, z.number()]) })).min(1),
+});
+
 export const TemplateSchema = z.object({
   id: Id,
   name: z.string().min(1),
@@ -229,6 +248,8 @@ export const TemplateSchema = z.object({
   layout: LayoutSchema,
   wizard: WizardSchema.optional(),
   creation: CreationSchema.optional(),
+  progression: ProgressionSchema.optional(),
+  rests: z.array(RestSchema).default([]),
 });
 
 export type Modifier = z.infer<typeof ModifierSchema>;
@@ -242,6 +263,8 @@ export type ConditionDef = z.infer<typeof ConditionSchema>;
 export type ValidationDef = z.infer<typeof ValidationSchema>;
 export type Template = z.infer<typeof TemplateSchema>;
 export type CreationDef = z.infer<typeof CreationSchema>;
+export type ProgressionDef = z.infer<typeof ProgressionSchema>;
+export type RestDef = z.infer<typeof RestSchema>;
 export type AttributeMethod = NonNullable<CreationDef['attributes']>['methods'][number];
 export type PointBuyMethod = Extract<AttributeMethod, { kind: 'pointBuy' }>;
 export type RollMethod = Extract<AttributeMethod, { kind: 'roll' }>;

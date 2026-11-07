@@ -38,6 +38,14 @@ export interface CharacterData {
   lists: Record<string, StoredList>;
   conditions: string[];
   creation?: CreationState;
+  /** Rolagens salvas do personagem, por chave. A expressão pode usar os campos da ficha. */
+  macros?: Record<string, Macro>;
+}
+
+export interface Macro {
+  label: string;
+  expr: string;
+  order: number;
 }
 
 /** Item do inventário (tabela `items`), no formato que o motor consome. */
