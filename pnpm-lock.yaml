@@ -41,6 +41,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.107.1
         version: 5.107.1(@types/react@19.3.0)(react@19.3.1)
+      dexie:
+        specifier: ^4.4.7
+        version: 4.4.7
       i18next:
         specifier: ^27.0.1
         version: 27.0.1(typescript@5.9.3)
@@ -792,6 +795,9 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  dexie@4.4.7:
+    resolution: {integrity: sha512-wemFiCl3DTCnfzyqepUTX1ugbYbkTrw3aEZOG7YjAOUoEQB5g5PrEywPzk5JpbX/SxqQ9IvjUpxCDIEjoOWEfA==}
 
   eciesjs@0.5.0:
     resolution: {integrity: sha512-s0J9SEVYAEPg7J63GFMApLYzPH9VNIQIyC6s15JpnqVc0TqcKWdbgFlnAweEBRyMmko2dcs2sfC83Hj4J43tuA==}
@@ -1731,6 +1737,8 @@ snapshots:
   deep-eql@5.0.2: {}
 
   detect-libc@2.1.2: {}
+
+  dexie@4.4.7: {}
 
   eciesjs@0.5.0:
     dependencies:

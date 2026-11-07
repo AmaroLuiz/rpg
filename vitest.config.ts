@@ -11,6 +11,12 @@ export default defineConfig({
       },
       {
         test: {
+          name: 'web',
+          include: ['apps/web/test/**/*.test.ts'],
+        },
+      },
+      {
+        test: {
           name: 'banco',
           include: ['supabase/test/**/*.test.ts'],
           globalSetup: ['supabase/test/global-setup.ts'],

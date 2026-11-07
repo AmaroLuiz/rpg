@@ -2,6 +2,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useEffect, useSyncExternalStore } from 'react';
 import { supabase } from '../lib/supabase';
+import { acceptServerRow, characterKeys, type CharacterRow } from './characters';
 
 /**
  * Um canal Realtime por mesa, compartilhado por todas as telas dela.
@@ -22,9 +23,6 @@ interface Entry {
 const registry = new Map<string, Entry>();
 const EMPTY = new Set<string>();
 
-/** Tabelas da mesa que o app acompanha ao vivo. Fases seguintes acrescentam aqui. */
-const WATCHED = ['campaign_members'] as const;
-
 function open(campaignId: string, userId: string, qc: QueryClient): Entry {
   const channel = supabase.channel(`mesa:${campaignId}`, { config: { presence: { key: userId } } });
   const entry: Entry = { channel, refs: 0, online: new Set(), listeners: new Set() };
@@ -32,10 +30,20 @@ function open(campaignId: string, userId: string, qc: QueryClient): Entry {
     void qc.invalidateQueries({ queryKey: ['campaigns', campaignId] });
     void qc.invalidateQueries({ queryKey: ['campaigns'], exact: true });
   };
-  for (const table of WATCHED) {
-    channel.on('postgres_changes', { event: '*', schema: 'public', table, filter: `campaign_id=eq.${campaignId}` }, refresh);
-  }
+  const byCampaign = `campaign_id=eq.${campaignId}`;
+  channel.on('postgres_changes', { event: '*', schema: 'public', table: 'campaign_members', filter: byCampaign }, refresh);
   channel.on('postgres_changes', { event: '*', schema: 'public', table: 'campaigns', filter: `id=eq.${campaignId}` }, refresh);
+  // Fichas: a linha nova chega inteira; entra no cache se a versão for mais nova.
+  channel.on('postgres_changes', { event: '*', schema: 'public', table: 'characters', filter: byCampaign }, (payload) => {
+    if (payload.eventType !== 'DELETE') acceptServerRow(payload.new as CharacterRow);
+    void qc.invalidateQueries({ queryKey: characterKeys.list(campaignId) });
+  });
+  channel.on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: byCampaign }, () => {
+    void qc.invalidateQueries({ queryKey: ['character-items'] });
+  });
+  channel.on('postgres_changes', { event: '*', schema: 'public', table: 'notes', filter: byCampaign }, () => {
+    void qc.invalidateQueries({ queryKey: ['notes', campaignId] });
+  });
   channel.on('presence', { event: 'sync' }, () => {
     entry.online = new Set(Object.keys(channel.presenceState()));
     entry.listeners.forEach((l) => l());
@@ -46,6 +54,8 @@ function open(campaignId: string, userId: string, qc: QueryClient): Entry {
       void channel.track({ at: new Date().toISOString() });
       // Mudanças feitas entre a primeira leitura e a assinatura ficariam perdidas: relê uma vez.
       refresh();
+      void qc.invalidateQueries({ queryKey: characterKeys.list(campaignId) });
+      void qc.invalidateQueries({ queryKey: ['character'] });
     }
   });
   return entry;

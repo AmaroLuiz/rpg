@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useCampaign, useDeleteCampaign, useRegenerateInvite, useRemoveMember } from '../api/campaigns';
 import { useCampaignRealtime } from '../api/realtime';
+import { CharacterList } from './CharacterList';
 import { useUserId } from '../auth/AuthProvider';
 import { Button, Card, ErrorNote, Spinner, cx } from '../components/ui';
 import { friendlyError } from '../lib/errors';
@@ -61,6 +62,8 @@ export function Campaign() {
       </div>
 
       {actionError && <ErrorNote>{friendlyError(actionError)}</ErrorNote>}
+
+      <CharacterList campaignId={c.id} userId={userId} isGm={isGm} />
 
       <Card>
         <h2 className="mb-3 font-medium">{t('campaign.members')}</h2>

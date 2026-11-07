@@ -11,7 +11,8 @@ Documento de arquitetura e modelo de dados: https://claude.ai/artifact/7NpTy27nT
 | M0 — Motor de regras | Pronto: fórmulas, dados, modificadores, validação de template, cálculo da ficha, rolagens, operações de escrita |
 | M1 — Templates | Pronto: Ordem Paranormal e Tormenta20 (Jogo do Ano), com personagens de referência testados |
 | M2 — Fundação | Pronto: banco com RLS, login por e-mail (Google pronto no código, falta configurar o OAuth), criar mesa, convite por código e link, papéis, presença e atualização ao vivo |
-| M3 — Ficha | Próximo |
+| M3 — Ficha | Pronto: ficha gerada pelo template (abas, seções, listas), recursos com +/−, condições, origem de cada número, avisos, notas, fila offline que sobrevive a fechar o app, edição ao vivo entre mestre e jogador |
+| M4 — Criação | Próximo |
 
 ## Estrutura
 
@@ -41,7 +42,7 @@ pnpm dev                           # http://localhost:5173
 ```bash
 pnpm test        # motor, templates e banco (o banco sobe um Postgres temporário sozinho)
 pnpm typecheck
-pnpm e2e         # fluxo no navegador; precisa do Supabase local e do `pnpm dev` rodando
+pnpm e2e         # fluxos da mesa e da ficha no navegador; precisa do Supabase local e do `pnpm dev` rodando
 ```
 
 Os testes do banco usam o Postgres instalado na máquina (`/usr/lib/postgresql/*/bin`). Para usar outro, defina `TEST_DATABASE_URL` apontando para um banco vazio.

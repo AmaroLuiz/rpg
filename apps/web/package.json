@@ -14,6 +14,7 @@
     "@rpg/templates": "workspace:*",
     "@supabase/supabase-js": "^2.119.0",
     "@tanstack/react-query": "^5.107.1",
+    "dexie": "^4.4.7",
     "i18next": "^27.0.1",
     "lucide-react": "^1.70.0",
     "react": "^19.3.1",
