@@ -69,7 +69,7 @@ describe('mesas e convites', () => {
 
   it('sistema desconhecido é recusado', async () => {
     const u = await createUser('Mestre');
-    await expectPgError(as(u, (q) => q(`select public.create_campaign('X', 'gurps')`)), 'P0002');
+    await expectPgError(as(u, (q) => q(`select public.create_campaign('X', 'gurps')`)), 'PT404');
   });
 
   it('entrar é idempotente e aceita código digitado com espaço ou minúscula', async () => {
@@ -83,7 +83,7 @@ describe('mesas e convites', () => {
 
   it('código inválido dá erro claro', async () => {
     const u = await createUser('Perdido');
-    await expectPgError(as(u, (q) => q(`select public.join_campaign('ZZZZZZ')`)), 'P0002');
+    await expectPgError(as(u, (q) => q(`select public.join_campaign('ZZZZZZ')`)), 'PT404');
   });
 
   it('quem não é membro não vê a mesa', async () => {

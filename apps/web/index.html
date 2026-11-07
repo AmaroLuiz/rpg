@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#16130f" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+    <title>Mesa</title>
+    <script>
+      // Aplica tema e tamanho de fonte antes do primeiro desenho, sem piscar.
+      (function () {
+        try {
+          var p = JSON.parse(localStorage.getItem('rpg.prefs') || '{}');
+          var dark = p.theme ? p.theme === 'dark' : !window.matchMedia('(prefers-color-scheme: light)').matches;
+          document.documentElement.classList.toggle('dark', dark);
+          if (p.fontScale) document.documentElement.style.fontSize = p.fontScale * 100 + '%';
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

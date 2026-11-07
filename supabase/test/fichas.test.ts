@@ -27,7 +27,7 @@ describe('personagens', () => {
 
   it('quem é de fora não cria personagem na mesa (nem descobre que ela existe)', async () => {
     const t = await createTable();
-    await expectPgError(createCharacter(t.outsider, t.campaign), 'P0002');
+    await expectPgError(createCharacter(t.outsider, t.campaign), 'PT404');
   });
 
   it('jogador não cria NPC nem ficha escondida; mestre cria monstro só dele', async () => {

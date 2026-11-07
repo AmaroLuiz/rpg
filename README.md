@@ -10,24 +10,52 @@ Documento de arquitetura e modelo de dados: https://claude.ai/artifact/7NpTy27nT
 | --- | --- |
 | M0 — Motor de regras | Pronto: fórmulas, dados, modificadores, validação de template, cálculo da ficha, rolagens, operações de escrita |
 | M1 — Templates | Pronto: Ordem Paranormal e Tormenta20 (Jogo do Ano), com personagens de referência testados |
-| M2 — Fundação (Supabase, login, mesas) | Próximo |
+| M2 — Fundação | Pronto: banco com RLS, login por e-mail (Google pronto no código, falta configurar o OAuth), criar mesa, convite por código e link, papéis, presença e atualização ao vivo |
+| M3 — Ficha | Próximo |
 
 ## Estrutura
 
 ```text
 packages/engine      motor de regras (TypeScript puro)
 packages/templates   ordem-paranormal.json, tormenta20.json
-apps/web             PWA React (a fazer)
-supabase/            migrações, RLS, Edge Functions (a fazer)
+apps/web             app React (Vite, Tailwind, TanStack Query, supabase-js)
+supabase/migrations  esquema, RLS, funções e templates embutidos
+supabase/test        testes do banco (Postgres temporário que imita o Supabase)
+scripts/             gerador da migração de templates
 ```
 
-## Comandos
+## Rodar localmente
+
+Requer Node 22+, pnpm e Docker.
 
 ```bash
 pnpm install
-pnpm test        # testes do motor e dos templates
-pnpm typecheck   # tsc -b em todos os pacotes
+pnpm db:start                      # Supabase local; aplica as migrações
+cp apps/web/.env.example apps/web/.env.local
+# preencha VITE_SUPABASE_ANON_KEY com o ANON_KEY de `pnpm supabase status`
+pnpm dev                           # http://localhost:5173
 ```
+
+## Testes
+
+```bash
+pnpm test        # motor, templates e banco (o banco sobe um Postgres temporário sozinho)
+pnpm typecheck
+pnpm e2e         # fluxo no navegador; precisa do Supabase local e do `pnpm dev` rodando
+```
+
+Os testes do banco usam o Postgres instalado na máquina (`/usr/lib/postgresql/*/bin`). Para usar outro, defina `TEST_DATABASE_URL` apontando para um banco vazio.
+
+## Mudou um template?
+
+Suba o `version` no JSON e gere uma migração nova com `node scripts/gen-template-migration.mjs supabase/migrations/<data>_templates_vN.sql`. Um teste falha se o JSON e a migração ficarem diferentes. Fichas existentes continuam na versão em que foram criadas.
+
+## Publicar
+
+1. Crie um projeto no [Supabase](https://supabase.com) e rode `pnpm supabase link --project-ref <ref>` e `pnpm supabase db push`.
+2. Em Authentication → URL Configuration, coloque o endereço do app em Site URL e em Redirect URLs.
+3. Para login com Google: crie um OAuth Client no Google Cloud e ative o provedor Google em Authentication → Providers.
+4. Publique `apps/web` na Vercel ou Cloudflare Pages (build `pnpm build`, saída `apps/web/dist`) com `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` do projeto. Configure o fallback de SPA para `index.html`.
 
 ## Linguagem de fórmulas
 

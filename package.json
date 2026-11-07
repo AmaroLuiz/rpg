@@ -6,15 +6,22 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b && tsc -p supabase",
+    "typecheck": "tsc -b && tsc -p supabase && tsc -p apps/web",
     "test:engine": "vitest run --project motor",
     "test:db": "vitest run --project banco",
-    "gen:templates": "node scripts/gen-template-migration.mjs"
+    "gen:templates": "node scripts/gen-template-migration.mjs",
+    "dev": "pnpm --filter @rpg/web dev",
+    "build": "pnpm --filter @rpg/web build",
+    "db:start": "supabase start -x studio,imgproxy,vector,logflare,supavisor,edge-runtime,postgres-meta",
+    "db:reset": "supabase db reset",
+    "db:types": "supabase gen types typescript --local --schema public > apps/web/src/lib/database.types.ts",
+    "e2e": "node apps/web/e2e/mesa.e2e.cjs"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
     "@types/pg": "^8.23.1",
     "pg": "^8.23.1",
+    "supabase": "^3.0.0",
     "typescript": "^5.9.0",
     "vitest": "^3.2.0"
   }

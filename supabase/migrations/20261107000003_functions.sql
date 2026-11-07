@@ -1,4 +1,5 @@
 -- Funções chamadas pelo app (supabase.rpc). Executam como dono e conferem o papel antes de gravar.
+-- Códigos de erro: PT404 vira HTTP 404 no PostgREST; 42501 vira 403; 22023 vira 400.
 
 -- ---------- utilidades internas ----------
 
@@ -60,7 +61,7 @@ declare
 begin
   select id into tpl from public.templates where slug = p_template_slug;
   if tpl is null then
-    raise exception 'Sistema desconhecido: %', p_template_slug using errcode = 'P0002';
+    raise exception 'Sistema desconhecido: %', p_template_slug using errcode = 'PT404';
   end if;
   insert into public.campaigns (name, description, template_id, gm_id, invite_code)
   values (trim(p_name), coalesce(p_description, ''), tpl, uid, private.new_invite_code())
@@ -78,7 +79,7 @@ begin
   select id into cid from public.campaigns
   where invite_code = upper(regexp_replace(coalesce(p_code, ''), '[^A-Za-z0-9]', '', 'g'));
   if cid is null then
-    raise exception 'Código de convite inválido' using errcode = 'P0002';
+    raise exception 'Código de convite inválido' using errcode = 'PT404';
   end if;
   insert into public.campaign_members (campaign_id, user_id, role)
   values (cid, uid, 'player')
@@ -122,7 +123,7 @@ begin
   join public.template_versions v on v.template_id = t.id and v.version = t.current_version
   where c.id = p_campaign;
   if tv is null then
-    raise exception 'Mesa não encontrada' using errcode = 'P0002';
+    raise exception 'Mesa não encontrada' using errcode = 'PT404';
   end if;
   insert into public.characters (campaign_id, owner_id, kind, template_version_id, name, data, visibility, is_library)
   values (p_campaign, uid, p_kind, tv, coalesce(p_name, ''), coalesce(p_data, '{"values": {}, "lists": {}, "conditions": []}'), p_visibility, p_is_library)
