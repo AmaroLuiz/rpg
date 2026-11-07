@@ -43,7 +43,7 @@ export function RollDialog({ spec, onClose }: { spec: RollSpec; onClose(): void 
 
   const go = async () => {
     const row = await roll
-      .mutateAsync({ ...spec.request, bonus, ...(spec.extraDice ? { dados } : {}), visibility })
+      .mutateAsync({ req: { ...spec.request, bonus, ...(spec.extraDice ? { dados } : {}), visibility }, ...(spec.local ? { local: spec.local } : {}) })
       .catch(() => null);
     if (row) setLast(row);
   };
@@ -78,6 +78,7 @@ export function RollDialog({ spec, onClose }: { spec: RollSpec; onClose(): void 
           <div role="status" aria-live="polite" className="rounded-2xl bg-surface-2/60 p-4">
             <RollResultView result={last.result} />
             {last.visibility !== 'public' && <p className="mt-1 text-xs text-accent">{last.visibility === 'gm' ? t('roller.secret') : t('roller.toGm')}</p>}
+            {last.pending && <p className="mt-1 text-xs text-accent">{t('roller.offlinePending')}</p>}
           </div>
         )}
 

@@ -1,5 +1,7 @@
-import { ChevronRight, EyeOff, Plus } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { ChevronRight, EyeOff, FileUp, Plus } from 'lucide-react';
+import { useRef, useState, type FormEvent } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { importCharacter } from '../api/exporting';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
 import { useCharacters, useCreateCharacter } from '../api/characters';
@@ -15,6 +17,23 @@ export function CharacterList({ campaignId, userId, isGm }: { campaignId: string
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
   const [asNpc, setAsNpc] = useState(false);
+  const file = useRef<HTMLInputElement>(null);
+  const qc = useQueryClient();
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const onImport = async (f: File) => {
+    setImportError(null);
+    setImporting(true);
+    try {
+      const id = await importCharacter(campaignId, f);
+      void qc.invalidateQueries({ queryKey: ['characters', campaignId] });
+      navigate(`/mesas/${campaignId}/personagens/${id}`);
+    } catch (e) {
+      setImportError(friendlyError(e));
+    } finally {
+      setImporting(false);
+    }
+  };
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -59,6 +78,7 @@ export function CharacterList({ campaignId, userId, isGm }: { campaignId: string
         </form>
       )}
       {characters.data?.length === 0 && !adding && <p className="text-muted">{t('characters.empty')}</p>}
+      {importError && <ErrorNote>{importError}</ErrorNote>}
       <ul className="flex flex-col divide-y divide-line">
         {list.map((c) => (
           <li key={c.id}>
@@ -86,6 +106,22 @@ export function CharacterList({ campaignId, userId, isGm }: { campaignId: string
           </li>
         ))}
       </ul>
+      <input
+        ref={file}
+        type="file"
+        accept="application/json,.json"
+        className="sr-only"
+        aria-label={t('exporting.importCharacter')}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void onImport(f);
+          e.target.value = '';
+        }}
+      />
+      <Button variant="ghost" className="mt-1 w-full text-sm text-muted" busy={importing} onClick={() => file.current?.click()}>
+        <FileUp className="size-4" aria-hidden />
+        {t('exporting.importCharacter')}
+      </Button>
     </Card>
   );
 }

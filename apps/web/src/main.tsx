@@ -1,26 +1,28 @@
-import { QueryClientProvider } from '@tanstack/react-query';
-import { StrictMode } from 'react';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { lazy, StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { AuthProvider, RequireAuth } from './auth/AuthProvider';
 import { Layout } from './components/Layout';
 import './i18n';
 import './index.css';
-import { Campaign } from './pages/Campaign';
-import { CharacterSheet } from './pages/CharacterSheet';
-import { CreateCharacter } from './pages/CreateCharacter';
-import { queryClient } from './sync';
+import { persister, queryClient } from './sync';
 import { Campaigns } from './pages/Campaigns';
-import { Join } from './pages/Join';
 import { Login } from './pages/Login';
-import { NewCampaign } from './pages/NewCampaign';
-import { Profile } from './pages/Profile';
-import { Rolls } from './pages/Rolls';
-import { Combat } from './pages/Combat';
-import { Handouts } from './pages/Handouts';
-import { Items } from './pages/Items';
-import { Journal } from './pages/Journal';
 
+
+// Cada tela vira um pedaço separado, baixado na primeira vez que é aberta.
+const Campaign = lazy(() => import('./pages/Campaign').then((m) => ({ default: m.Campaign })));
+const CharacterSheet = lazy(() => import('./pages/CharacterSheet').then((m) => ({ default: m.CharacterSheet })));
+const CreateCharacter = lazy(() => import('./pages/CreateCharacter').then((m) => ({ default: m.CreateCharacter })));
+const Join = lazy(() => import('./pages/Join').then((m) => ({ default: m.Join })));
+const NewCampaign = lazy(() => import('./pages/NewCampaign').then((m) => ({ default: m.NewCampaign })));
+const Profile = lazy(() => import('./pages/Profile').then((m) => ({ default: m.Profile })));
+const Rolls = lazy(() => import('./pages/Rolls').then((m) => ({ default: m.Rolls })));
+const Combat = lazy(() => import('./pages/Combat').then((m) => ({ default: m.Combat })));
+const Handouts = lazy(() => import('./pages/Handouts').then((m) => ({ default: m.Handouts })));
+const Items = lazy(() => import('./pages/Items').then((m) => ({ default: m.Items })));
+const Journal = lazy(() => import('./pages/Journal').then((m) => ({ default: m.Journal })));
 
 const router = createBrowserRouter([
   { path: '/entrar', element: <Login /> },
@@ -50,10 +52,15 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister, maxAge: 7 * 24 * 3600 * 1000, buster: 'v2' }}
+      // O cache do aparelho só serve para mostrar algo na hora; depois de restaurado, tudo é relido.
+      onSuccess={() => void queryClient.invalidateQueries()}
+    >
       <AuthProvider>
         <RouterProvider router={router} />
       </AuthProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   </StrictMode>,
 );

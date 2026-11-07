@@ -15,7 +15,7 @@ Documento de arquitetura e modelo de dados: https://claude.ai/artifact/7NpTy27nT
 | M4 — Criação | Pronto: assistente passo a passo definido pelo template, atributos por pontos / rolagem / manual com ajuste de raça, rascunho retomado, revisão com avisos, modo livre, retrato |
 | M5 — Mesa | Pronto: rolagens no servidor (Edge Function) a partir da ficha ou livres, secreta do mestre, "só para o mestre", histórico e aviso ao vivo; biblioteca de NPCs e monstros; combate com cópias numeradas, iniciativa rolada e ordenada, turnos e rodadas, PV secreto de inimigos com estado público, esconder combatentes |
 | M6 — Mestre | Pronto: inventário editável com carga e bônus ao equipar, biblioteca de itens, baús revelados na hora certa (mestre distribui ou cada um pega), item misterioso identificado depois, handouts com imagem para todos ou para escolhidos, diário de sessões e notas com busca em português e etiquetas |
-| M7 — Refinamento | Próximo |
+| M7 — Refinamento | Pronto: subir de nível/NEX (o PV atual acompanha o máximo), descansos, rolagens salvas (macros), exportar campanha e ficha em JSON, importar ficha em outra mesa, app instalável que abre sem internet, rolagem offline marcada no histórico, código dividido por tela |
 
 ## Estrutura
 
@@ -42,12 +42,29 @@ cp apps/web/.env.example apps/web/.env.local
 pnpm dev                           # http://localhost:5173
 ```
 
+## Instalar no celular e jogar sem internet
+
+O app é uma PWA: no navegador do celular, use "Adicionar à tela inicial". Depois de abrir uma mesa e as fichas com internet, o app abre sem conexão com os últimos dados:
+
+- mudanças na ficha ficam guardadas e são enviadas quando a rede volta (inclusive se o app for fechado no meio);
+- rolagens feitas sem internet são roladas no aparelho e vão para o histórico marcadas como "offline";
+- inventário, notas, handouts e combate precisam de internet para mudar (ficam só para leitura offline).
+
+Ao sair da conta, tudo que o aparelho guardou é apagado.
+
+## Exportar e importar
+
+- Mestre: "Exportar campanha (JSON)" na página da mesa leva fichas, itens (com segredos), baús, handouts, notas, diário, rolagens, combates e os templates usados.
+- Dono da ficha: "Exportar ficha (JSON)" na ficha. A ficha exportada pode ser importada em outra mesa do mesmo sistema ("Importar ficha de outra mesa").
+
 ## Testes
 
 ```bash
 pnpm test        # motor, templates e banco (o banco sobe um Postgres temporário sozinho)
 pnpm typecheck
-pnpm e2e         # fluxos da mesa e da ficha no navegador; precisa do Supabase local e do `pnpm dev` rodando
+pnpm e2e         # 6 fluxos no navegador; precisa do Supabase local e do `pnpm dev` rodando
+pnpm preview     # build de produção com service worker em http://localhost:4173
+pnpm e2e:offline # fluxo sem internet; precisa do `pnpm preview` rodando
 ```
 
 Os testes do banco usam o Postgres instalado na máquina (`/usr/lib/postgresql/*/bin`). Para usar outro, defina `TEST_DATABASE_URL` apontando para um banco vazio.

@@ -29,5 +29,10 @@ export function useSheetSetup(campaignId: string, charId: string) {
       ? { compiled: template.data, sheet, data, canEdit: row.owner_id === userId || isGm, isGm, change, characterId: charId, campaignId }
       : null;
 
-  return { ctx, row, loading, error, campaign: campaign.data ?? null, isGm, userId };
+  // Dados vindos só do cache do aparelho, ainda conferindo com o servidor.
+  // (Ao abrir, o cache do aparelho é restaurado antes da primeira busca: isFetching ainda é false.)
+  // Dado recém-gravado (ex.: ficha acabou de ser criada) é fresco e não precisa esperar.
+  const online = typeof navigator === 'undefined' || navigator.onLine;
+  const syncing = online && !character.error && !character.isFetchedAfterMount && (character.isFetching || character.isStale);
+  return { ctx, row, loading, error, campaign: campaign.data ?? null, isGm, userId, syncing };
 }

@@ -1,4 +1,6 @@
 import { UserRound } from 'lucide-react';
+import { Suspense } from 'react';
+import { Spinner } from './ui';
 import { useUserId } from '../auth/AuthProvider';
 import { RollerProvider } from '../roller/RollerProvider';
 import { RollToasts } from '../roller/RollToasts';
@@ -21,7 +23,9 @@ export function Layout() {
         </Link>
       </header>
       <main className="flex flex-1 flex-col gap-4">
-        <Outlet />
+        <Suspense fallback={<Spinner label={t('common.loading')} />}>
+          <Outlet />
+        </Suspense>
       </main>
       <RollToasts userId={userId} />
     </div>

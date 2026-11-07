@@ -1,3 +1,4 @@
+import { cryptoRng, rollExpression } from '@rpg/engine';
 import { Dices } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +28,10 @@ export function Rolls() {
       title: title || expression,
       isGm,
       request: { campaign_id: campaignId, expression, ...(title ? { label: title } : {}) },
+      local: ({ bonus }) => {
+        const r = rollExpression(expression, cryptoRng(), title);
+        return bonus ? { ...r, total: r.total + bonus, bonus, text: `${r.text} ${bonus > 0 ? '+' : '−'} ${Math.abs(bonus)} (situacional)` } : r;
+      },
     });
 
   const submit = (e: FormEvent) => {

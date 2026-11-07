@@ -7,6 +7,7 @@ import { Button, Card, ErrorNote, Field, Input, cx } from '../components/ui';
 import { friendlyError } from '../lib/errors';
 import { loadPrefs, savePrefs, type Prefs } from '../lib/prefs';
 import { supabase } from '../lib/supabase';
+import { forgetEverything, outbox } from '../sync';
 
 function Choice<T extends string | number>({
   legend,
@@ -101,7 +102,17 @@ export function Profile() {
           ]}
         />
       </Card>
-      <Button variant="danger" className="mt-auto" onClick={() => void supabase.auth.signOut()}>
+      <Button
+        variant="danger"
+        className="mt-auto"
+        onClick={async () => {
+          await outbox.sealAll();
+          const pending = outbox.status().pending;
+          if (pending > 0 && !confirm(t('profile.pendingSignOut', { count: pending }))) return;
+          await supabase.auth.signOut();
+          await forgetEverything();
+        }}
+      >
         {t('auth.signOut')}
       </Button>
     </>

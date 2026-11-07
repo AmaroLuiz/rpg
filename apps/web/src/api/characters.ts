@@ -149,12 +149,14 @@ export function useTemplateVersion(versionId: string | undefined) {
     enabled: !!versionId,
     staleTime: Infinity,
     gcTime: Infinity,
-    queryFn: async () => compile(versionId!, await fetchTemplateSchema(versionId!)),
+    // O cache (inclusive o gravado no aparelho) guarda só o JSON; compilar fica no select, com memo.
+    queryFn: () => fetchTemplateSchema(versionId!),
+    select: (schema) => compile(versionId!, schema),
   });
 }
 
 /** Versão atual do template da mesa (para fichas novas). */
-async function campaignTemplate(campaignId: string): Promise<{ versionId: string; compiled: CompiledTemplate }> {
+async function campaignTemplate(campaignId: string): Promise<{ versionId: string; schema: unknown; compiled: CompiledTemplate }> {
   const { data, error } = await supabase
     .from('campaigns')
     .select('template:templates(current_version, versions:template_versions(id, version, schema))')
@@ -165,7 +167,7 @@ async function campaignTemplate(campaignId: string): Promise<{ versionId: string
   const v = tpl.versions.find((x) => x.version === tpl.current_version);
   if (!v) throw new Error('Template da mesa sem versão publicada');
   await localDb.templates.put({ id: v.id, schema: v.schema });
-  return { versionId: v.id, compiled: compile(v.id, v.schema) };
+  return { versionId: v.id, schema: v.schema, compiled: compile(v.id, v.schema) };
 }
 
 /** Template atual da mesa (para itens da biblioteca e baús, que não têm ficha). */
@@ -173,7 +175,11 @@ export function useCampaignTemplate(campaignId: string) {
   return useQuery({
     queryKey: characterKeys.campaignTemplate(campaignId),
     staleTime: 5 * 60 * 1000,
-    queryFn: async () => (await campaignTemplate(campaignId)).compiled,
+    queryFn: async () => {
+      const { versionId, schema } = await campaignTemplate(campaignId);
+      return { versionId, schema };
+    },
+    select: (d) => compile(d.versionId, d.schema),
   });
 }
 

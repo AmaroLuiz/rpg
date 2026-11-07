@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
-import type { RollRequest } from '../api/rolls';
+import type { LocalRoll, RollRequest } from '../api/rolls';
 import { RollDialog } from './RollDialog';
 
 export interface RollSpec {
@@ -8,6 +8,8 @@ export interface RollSpec {
   /** O template usa @rolagem.dados nesta rolagem (ex.: Ordem Paranormal). */
   extraDice?: boolean;
   isGm: boolean;
+  /** Mesma rolagem calculada no aparelho, para usar sem internet. */
+  local?: LocalRoll;
 }
 
 const RollerContext = createContext<(spec: RollSpec) => void>(() => {});

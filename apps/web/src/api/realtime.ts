@@ -96,6 +96,10 @@ function open(campaignId: string, userId: string, qc: QueryClient): Entry {
       refresh();
       void qc.invalidateQueries({ queryKey: characterKeys.list(campaignId) });
       void qc.invalidateQueries({ queryKey: ['character'] });
+      for (const k of ['combat', 'rolls', 'items', 'loot', 'handouts', 'notes', 'library']) {
+        void qc.invalidateQueries({ queryKey: [k, campaignId] });
+      }
+      void qc.invalidateQueries({ queryKey: ['character-items'] });
     }
   });
   return entry;

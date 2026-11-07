@@ -1,12 +1,15 @@
-import { AlertTriangle, ChevronDown, Info } from 'lucide-react';
+import { AlertTriangle, ChevronDown, Download, Info } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
-import { Card, ErrorNote, Spinner, cx } from '../components/ui';
+import { Button, Card, ErrorNote, Spinner, cx } from '../components/ui';
+import { exportCharacter } from '../api/exporting';
 import { friendlyError } from '../lib/errors';
 import { SheetContext } from '../sheet/context';
 import { useSheetSetup } from '../sheet/useSheetSetup';
 import { FieldView } from '../sheet/FieldView';
+import { Macros } from '../sheet/Macros';
+import { SheetActions } from '../sheet/SheetActions';
 import { PortraitImage } from '../sheet/Portrait';
 import { ResourceField } from '../sheet/Resource';
 import { SyncBadge } from '../sheet/SyncBadge';
@@ -91,6 +94,26 @@ export function CharacterSheet() {
           {resources.map((f) => (
             <ResourceField key={f.id} fieldId={f.id} compact />
           ))}
+        </Card>
+      )}
+
+      {ctx.canEdit && (
+        <Card className="flex flex-col gap-3">
+          <Macros />
+          {/* Usados de vez em quando: ficam recolhidos para a ficha chegar logo às abas. */}
+          <details className="group rounded-xl border border-line">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-medium">
+              {t('actions.more')}
+              <ChevronDown className="size-4 text-muted transition group-open:rotate-180" aria-hidden />
+            </summary>
+            <div className="flex flex-col gap-3 px-3 pb-3">
+              <SheetActions />
+              <Button variant="ghost" className="self-start text-sm text-muted" onClick={() => void exportCharacter(charId).catch((e) => alert(friendlyError(e)))}>
+                <Download className="size-4" aria-hidden />
+                {t('exporting.character')}
+              </Button>
+            </div>
+          </details>
         </Card>
       )}
 

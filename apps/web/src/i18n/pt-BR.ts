@@ -156,6 +156,9 @@ export const ptBR = {
     by: '{{name}}',
     someone: 'alguém',
     rolled: '{{name}} rolou {{label}}: {{total}}',
+    offline: 'offline',
+    offlinePendingShort: 'offline · aguardando envio',
+    offlinePending: 'Sem internet: rolado no aparelho. Vai para o histórico, marcado como offline, quando a conexão voltar.',
   },
   combat: {
     title: 'Combate',
@@ -287,6 +290,29 @@ export const ptBR = {
     emptyDiary: 'Nenhuma sessão registrada ainda.',
     onlyMe: 'Só eu (mestre)',
   },
+  actions: {
+    confirm: 'Confirmar',
+    nothing: 'Nada a recuperar: já está tudo no máximo.',
+    changes: 'O que muda',
+    maxed: 'No máximo',
+    more: 'Evolução, descanso e exportar',
+  },
+  macros: {
+    title: 'Rolagens salvas',
+    new: 'Nova',
+    label: 'Nome da rolagem',
+    expr: 'Rolagem',
+    exprHint: 'Pode usar campos da ficha. Ex.: 1d20 + @for + 2',
+    empty: 'Salve aqui as rolagens que você usa sempre.',
+    edit: 'Editar {{label}}',
+    delete: 'Apagar {{label}}',
+    deleteConfirm: 'Apagar a rolagem "{{label}}"?',
+  },
+  exporting: {
+    campaign: 'Exportar campanha (JSON)',
+    character: 'Exportar ficha (JSON)',
+    importCharacter: 'Importar ficha de outra mesa',
+  },
   hub: {
     tools: 'Ferramentas da mesa',
   },
@@ -326,6 +352,8 @@ export const ptBR = {
     fontLarge: 'Grande',
     fontLarger: 'Maior',
     saved: 'Salvo',
+    pendingSignOut_one: 'Há {{count}} mudança na ficha que ainda não chegou ao servidor. Saindo agora, ela se perde. Sair mesmo assim?',
+    pendingSignOut_other: 'Há {{count}} mudanças na ficha que ainda não chegaram ao servidor. Saindo agora, elas se perdem. Sair mesmo assim?',
   },
   errors: {
     invalidLogin: 'E-mail ou senha incorretos.',

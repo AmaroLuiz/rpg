@@ -1,4 +1,4 @@
-import type { RollDef } from '@rpg/engine';
+import { cryptoRng, type RollDef } from '@rpg/engine';
 import { Dices } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useRoller } from '../roller/RollerProvider';
@@ -11,7 +11,8 @@ export function shortLabel(r: RollDef): string | null {
 }
 
 export function useRollAction() {
-  const { sheet, characterId, campaignId, isGm, canEdit } = useSheetCtx();
+  const { sheet, characterId, campaignId, isGm, canEdit, data } = useSheetCtx();
+  const name = (typeof data.values.nome === 'string' && data.values.nome) || '';
   const open = useRoller();
   return {
     canRoll: canEdit,
@@ -21,6 +22,10 @@ export function useRollAction() {
         title,
         isGm,
         extraDice: r.expr.includes('@rolagem.dados'),
+        local: ({ dados, bonus }) => {
+          const res = sheet.roll(r.id, { rng: cryptoRng(), dados, bonus, ...(itemKey ? { itemKey } : {}) });
+          return name ? { ...res, label: `${name}: ${res.label}` } : res;
+        },
         request: { campaign_id: campaignId, character_id: characterId, roll_id: r.id, ...(itemKey ? { item_key: itemKey } : {}) },
       });
     },

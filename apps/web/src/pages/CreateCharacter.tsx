@@ -18,20 +18,20 @@ export function CreateCharacter() {
   const { id: campaignId = '', charId = '' } = useParams();
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { ctx, row, loading, error } = useSheetSetup(campaignId, charId);
+  const { ctx, row, loading, error, syncing } = useSheetSetup(campaignId, charId);
   const meta = useUpdateCharacterMeta(charId);
   const [stepIdx, setStepIdx] = useState<number | null>(null);
 
   const steps = useMemo(() => ctx?.compiled.template.wizard?.steps ?? [], [ctx?.compiled]);
   const total = steps.length + 1; // + revisão
 
-  // Retoma no passo em que a pessoa parou.
+  // Retoma no passo em que a pessoa parou (esperando o servidor, não a cópia antiga do aparelho).
   useEffect(() => {
-    if (stepIdx !== null || !ctx) return;
+    if (stepIdx !== null || !ctx || syncing) return;
     const saved = ctx.data.creation?.step;
     const i = saved === '$revisao' ? steps.length : steps.findIndex((s) => s.id === saved);
     setStepIdx(i >= 0 ? i : 0);
-  }, [ctx, steps, stepIdx]);
+  }, [ctx, steps, stepIdx, syncing]);
 
   if (loading || (ctx && stepIdx === null)) return <Spinner label={t('common.loading')} />;
   if (error || !ctx || !row) {

@@ -1,8 +1,9 @@
-import { BookOpen, Check, Copy, Crown, Dices, Gem, NotebookPen, RefreshCw, ScrollText } from 'lucide-react';
+import { BookOpen, Check, Copy, Crown, Dices, Download, Gem, NotebookPen, RefreshCw, ScrollText } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useCampaign, useDeleteCampaign, useRegenerateInvite, useRemoveMember } from '../api/campaigns';
+import { exportCampaign } from '../api/exporting';
 import { useCampaignRealtime } from '../api/realtime';
 import { CharacterList } from './CharacterList';
 import { CombatCard } from './CombatCard';
@@ -33,6 +34,7 @@ export function Campaign() {
   const remove = useRemoveMember(id);
   const del = useDeleteCampaign();
   const { copied, copy } = useCopy();
+  const [exporting, setExporting] = useState(false);
 
   if (campaign.isPending) return <Spinner label={t('common.loading')} />;
   if (campaign.error || !campaign.data)
@@ -165,7 +167,16 @@ export function Campaign() {
         </Card>
       )}
 
-      <p className="text-center text-sm text-muted">{t('campaign.comingSoon')}</p>
+      {isGm && (
+        <Button variant="secondary" busy={exporting} onClick={async () => {
+          setExporting(true);
+          await exportCampaign(c.id).catch((e) => alert(friendlyError(e)));
+          setExporting(false);
+        }}>
+          <Download className="size-4" aria-hidden />
+          {t('exporting.campaign')}
+        </Button>
+      )}
 
       <div className="mt-auto pt-4">
         {isGm ? (

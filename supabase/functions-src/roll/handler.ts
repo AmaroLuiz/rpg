@@ -19,8 +19,22 @@ export const RollRequestSchema = z
     bonus: z.number().int().min(-100).max(100).optional(),
     visibility: z.enum(['public', 'gm', 'self_gm']).default('public'),
     offline: z.boolean().optional(),
+    /** Rolagem feita no aparelho sem internet, enviada depois. Entra no histórico marcada como offline. */
+    offline_result: z
+      .object({
+        label: z.string().max(200),
+        expression: z.string().max(200),
+        total: z.number().finite(),
+        text: z.string().max(2000),
+        bonus: z.number().finite().default(0),
+        dice: z.array(z.unknown()).max(20),
+        rollId: z.string().nullable().optional(),
+        itemKey: z.string().optional(),
+        rolled_at: z.string().max(40).optional(),
+      })
+      .optional(),
   })
-  .refine((r) => r.roll_id || r.expression, { message: 'Informe roll_id ou expression' })
+  .refine((r) => r.roll_id || r.expression || r.offline_result, { message: 'Informe roll_id ou expression' })
   .refine((r) => !r.roll_id || r.character_id, { message: 'roll_id exige character_id' });
 
 export type RollRequest = z.infer<typeof RollRequestSchema>;
@@ -87,6 +101,29 @@ export async function handleRoll(input: unknown, store: RollStore, rng: Rng): Pr
   try {
     let result: RollResult;
     let characterId: string | null = null;
+    if (req.offline_result) {
+      // Sem como refazer a rolagem: grava o que o aparelho rolou, marcado como offline para todos verem.
+      if (req.character_id) {
+        const ch = await store.character(req.character_id);
+        if (!ch || ch.campaign_id !== req.campaign_id) return fail(404, 'Personagem não encontrado');
+        if (ch.owner_id !== uid && !isGm) return fail(403, 'Só o dono ou o mestre rola por este personagem');
+        characterId = ch.id;
+      }
+      const o = req.offline_result;
+      result = { rollId: o.rollId ?? null, label: o.label, expression: o.expression, total: o.total, text: o.text, bonus: o.bonus, dice: o.dice as RollResult['dice'], ...(o.itemKey ? { itemKey: o.itemKey } : {}) };
+      const row = await store.insertRoll({
+        campaign_id: req.campaign_id,
+        user_id: uid,
+        character_id: characterId,
+        label: result.label.slice(0, 200),
+        expression: result.expression,
+        result,
+        total: result.total,
+        visibility,
+        offline: true,
+      });
+      return { status: 200, body: row };
+    }
     if (req.character_id) {
       const ch = await store.character(req.character_id);
       if (!ch || ch.campaign_id !== req.campaign_id) return fail(404, 'Personagem não encontrado');

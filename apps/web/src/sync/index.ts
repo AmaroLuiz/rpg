@@ -3,14 +3,26 @@ import { useSyncExternalStore } from 'react';
 import type { CharacterOp } from '@rpg/engine';
 import type { Json } from '../lib/database.types';
 import { supabase } from '../lib/supabase';
-import { dexieStore } from './local';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { clearLocalData, dexieStore, kvStorage } from './local';
 import { MemoryStore, Outbox, type Batch, type SendResult } from './outbox';
 
 export const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { retry: 1, refetchOnWindowFocus: true, staleTime: 10_000, networkMode: 'offlineFirst' },
+    // gcTime longo: o que foi visto fica guardado no aparelho para abrir sem internet.
+    queries: { retry: 1, refetchOnWindowFocus: true, staleTime: 10_000, gcTime: 7 * 24 * 3600 * 1000, networkMode: 'offlineFirst' },
   },
 });
+
+/** Cache das consultas no IndexedDB: o app abre com os últimos dados mesmo sem rede. */
+export const persister = createAsyncStoragePersister({ storage: kvStorage, key: 'rpg-query-cache', throttleTime: 1500 });
+
+/** Ao sair da conta: some o cache em memória e tudo que ficou no aparelho. */
+export async function forgetEverything() {
+  queryClient.clear();
+  await persister.removeClient();
+  await clearLocalData();
+}
 
 /** Códigos do Postgres que indicam falha passageira (conexão, timeout, conflito de transação). */
 const TRANSIENT_SQLSTATE = /^(08|53|57P|40001|40P01|57014)/;

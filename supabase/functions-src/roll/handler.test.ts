@@ -80,6 +80,16 @@ describe('rolagem no servidor', () => {
     expect((await handleRoll({ campaign_id: CAMPAIGN, roll_id: 'pericia' }, makeStore(OWNER).store, fixedRng([1]))).status).toBe(400);
   });
 
+  it('rolagem feita offline entra marcada, e continua exigindo permissão', async () => {
+    const offline_result = { label: 'Elena: Luta', expression: 'x', total: 18, text: '3d20kh1 [18, 2, 5] + 5', bonus: 0, dice: [] };
+    const { store, inserted } = makeStore(OWNER);
+    const res = await handleRoll({ campaign_id: CAMPAIGN, character_id: CHAR, offline_result }, store, fixedRng([1]));
+    expect(res.status).toBe(200);
+    expect(inserted[0]).toMatchObject({ offline: true, total: 18, label: 'Elena: Luta', character_id: CHAR });
+    expect((await handleRoll({ campaign_id: CAMPAIGN, character_id: CHAR, offline_result }, makeStore(OTHER).store, fixedRng([1]))).status).toBe(403);
+    expect((await handleRoll({ campaign_id: CAMPAIGN, offline_result: { ...offline_result, total: 'x' } }, makeStore(OWNER).store, fixedRng([1]))).status).toBe(400);
+  });
+
   it('personagem de outra mesa não é encontrado; erro do motor vira 400 em português', async () => {
     expect((await handleRoll(luta, makeStore(OWNER, { campaign_id: 'outra' }).store, fixedRng([1]))).status).toBe(404);
     const res = await handleRoll({ campaign_id: CAMPAIGN, expression: '101d6' }, makeStore(OWNER).store, fixedRng([1]));
