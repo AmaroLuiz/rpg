@@ -6,9 +6,15 @@
   "scripts": {
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b && tsc -p supabase",
+    "test:engine": "vitest run --project motor",
+    "test:db": "vitest run --project banco",
+    "gen:templates": "node scripts/gen-template-migration.mjs"
   },
   "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/pg": "^8.23.1",
+    "pg": "^8.23.1",
     "typescript": "^5.9.0",
     "vitest": "^3.2.0"
   }
