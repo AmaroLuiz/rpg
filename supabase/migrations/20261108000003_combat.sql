@@ -35,6 +35,20 @@ end $$;
 create trigger sync_public_status after insert or update of resources on public.combatant_secrets
   for each row execute function private.sync_public_status();
 
+-- Esconder ou tirar um combatente some com a linha para os jogadores, e o tempo real não avisa
+-- quem deixou de poder ver. Mexer no combate em si avisa todo mundo para reler a lista.
+create or replace function private.touch_encounter() returns trigger
+language plpgsql security definer set search_path = '' as $$
+begin
+  update public.encounters set updated_at = now() where id = coalesce(new.encounter_id, old.encounter_id);
+  return null;
+end $$;
+
+create trigger touch_encounter_on_hide after update of hidden on public.combatants
+  for each row when (old.hidden is distinct from new.hidden) execute function private.touch_encounter();
+create trigger touch_encounter_on_delete after delete on public.combatants
+  for each row execute function private.touch_encounter();
+
 -- ---------- adicionar combatentes ----------
 
 /*
@@ -103,6 +117,22 @@ end $$;
 
 -- ---------- iniciativa e turnos ----------
 
+-- Quem está agindo. A posição (turn_index) conta também os combatentes escondidos, que os
+-- jogadores não recebem; por isso o destaque na tela usa o id, não a posição.
+alter table public.encounters add column current_combatant_id uuid references public.combatants (id) on delete set null;
+
+create or replace function private.refresh_current(p_encounter uuid) returns void
+language sql security definer set search_path = '' as $$
+  update public.encounters e
+  set current_combatant_id = case when e.status = 'active' then (
+    select c.id from public.combatants c
+    where c.encounter_id = e.id
+    order by c.order_index, c.label
+    offset e.turn_index limit 1
+  ) end
+  where e.id = p_encounter
+$$;
+
 -- Ordena pela iniciativa (maior primeiro; empate pelo nome; sem iniciativa vai para o fim).
 create or replace function public.sort_initiative(p_encounter uuid) returns void
 language plpgsql security definer set search_path = '' as $$
@@ -119,6 +149,7 @@ begin
     from public.combatants where encounter_id = p_encounter
   ) o
   where c.id = o.id;
+  perform private.refresh_current(p_encounter);
 end $$;
 
 /*
@@ -143,7 +174,9 @@ begin
   end if;
 
   if enc.status <> 'active' then
-    update public.encounters set status = 'active', round = 1, turn_index = 0 where id = p_encounter returning * into enc;
+    update public.encounters set status = 'active', round = 1, turn_index = 0 where id = p_encounter;
+    perform private.refresh_current(p_encounter);
+    select * into enc from public.encounters where id = p_encounter;
     return enc;
   end if;
 
@@ -160,17 +193,47 @@ begin
       r := r - 1;
     end if;
   end if;
-  update public.encounters set turn_index = t, round = r where id = p_encounter returning * into enc;
+  update public.encounters set turn_index = t, round = r where id = p_encounter;
+  perform private.refresh_current(p_encounter);
+  select * into enc from public.encounters where id = p_encounter;
   return enc;
 end $$;
 
+-- Soma (ou define) um recurso de inimigo de forma atômica: toques rápidos do mestre não se perdem.
+create or replace function public.adjust_combatant_resource(p_combatant uuid, p_resource text, p_delta numeric, p_set numeric default null)
+returns jsonb
+language plpgsql security definer set search_path = '' as $$
+declare
+  sec public.combatant_secrets;
+begin
+  perform private.require_user();
+  select * into sec from public.combatant_secrets where combatant_id = p_combatant for update;
+  if sec.combatant_id is null or not private.is_gm(sec.campaign_id) then
+    raise exception 'Só o mestre mexe no PV de inimigos' using errcode = '42501';
+  end if;
+  if sec.resources -> p_resource is null then
+    raise exception 'Recurso % não existe neste combatente', p_resource using errcode = 'PT404';
+  end if;
+  update public.combatant_secrets
+  set resources = jsonb_set(
+    resources,
+    array[p_resource, 'atual'],
+    to_jsonb(coalesce(p_set, coalesce((resources -> p_resource ->> 'atual')::numeric, 0) + p_delta))
+  )
+  where combatant_id = p_combatant
+  returning resources into sec.resources;
+  return sec.resources;
+end $$;
+
 revoke execute on function
+  public.adjust_combatant_resource(uuid, text, numeric, numeric),
   public.add_combatants(uuid, uuid, int, jsonb, boolean),
   public.sort_initiative(uuid),
   public.advance_turn(uuid, int)
 from public, anon;
 
 grant execute on function
+  public.adjust_combatant_resource(uuid, text, numeric, numeric),
   public.add_combatants(uuid, uuid, int, jsonb, boolean),
   public.sort_initiative(uuid),
   public.advance_turn(uuid, int)

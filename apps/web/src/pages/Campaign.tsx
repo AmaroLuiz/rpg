@@ -5,6 +5,9 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { useCampaign, useDeleteCampaign, useRegenerateInvite, useRemoveMember } from '../api/campaigns';
 import { useCampaignRealtime } from '../api/realtime';
 import { CharacterList } from './CharacterList';
+import { CombatCard } from './CombatCard';
+import { LibraryCard } from './Library';
+import { RollHistory } from '../roller/RollHistory';
 import { useUserId } from '../auth/AuthProvider';
 import { Button, Card, ErrorNote, Spinner, cx } from '../components/ui';
 import { friendlyError } from '../lib/errors';
@@ -63,7 +66,21 @@ export function Campaign() {
 
       {actionError && <ErrorNote>{friendlyError(actionError)}</ErrorNote>}
 
+      <CombatCard campaignId={c.id} />
+
       <CharacterList campaignId={c.id} userId={userId} isGm={isGm} />
+
+      {isGm && <LibraryCard campaignId={c.id} />}
+
+      <Card>
+        <div className="mb-1 flex items-center justify-between">
+          <h2 className="font-medium">{t('roller.title')}</h2>
+          <Link to={`/mesas/${c.id}/rolagens`} className="flex min-h-11 items-center text-sm text-accent">
+            {t('roller.seeAll')}
+          </Link>
+        </div>
+        <RollHistory campaignId={c.id} limit={3} />
+      </Card>
 
       <Card>
         <h2 className="mb-3 font-medium">{t('campaign.members')}</h2>

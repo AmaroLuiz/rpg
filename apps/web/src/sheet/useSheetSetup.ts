@@ -26,7 +26,7 @@ export function useSheetSetup(campaignId: string, charId: string) {
 
   const ctx: SheetCtx | null =
     row && sheet && template.data && data
-      ? { compiled: template.data, sheet, data, canEdit: row.owner_id === userId || isGm, change, characterId: charId, campaignId }
+      ? { compiled: template.data, sheet, data, canEdit: row.owner_id === userId || isGm, isGm, change, characterId: charId, campaignId }
       : null;
 
   return { ctx, row, loading, error, campaign: campaign.data ?? null, isGm, userId };

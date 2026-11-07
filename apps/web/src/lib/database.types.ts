@@ -181,14 +181,14 @@ isOneToOne: false
                   ]
                 },"encounters": {
                   Row: {
-                    "campaign_id": string,"created_at": string,"id": string,"name": string,"round": number,"status": Database["public"]['Enums']["encounter_status"],"turn_index": number,"updated_at": string
+                    "campaign_id": string,"created_at": string,"current_combatant_id": string | null,"id": string,"name": string,"round": number,"status": Database["public"]['Enums']["encounter_status"],"turn_index": number,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "campaign_id": string,"created_at"?: string,"id"?: string,"name"?: string,"round"?: number,"status"?: Database["public"]['Enums']["encounter_status"],"turn_index"?: number,"updated_at"?: string
+                    "campaign_id": string,"created_at"?: string,"current_combatant_id"?: string | null,"id"?: string,"name"?: string,"round"?: number,"status"?: Database["public"]['Enums']["encounter_status"],"turn_index"?: number,"updated_at"?: string
                   }
                   Update: {
-                    "campaign_id"?: string,"created_at"?: string,"id"?: string,"name"?: string,"round"?: number,"status"?: Database["public"]['Enums']["encounter_status"],"turn_index"?: number,"updated_at"?: string
+                    "campaign_id"?: string,"created_at"?: string,"current_combatant_id"?: string | null,"id"?: string,"name"?: string,"round"?: number,"status"?: Database["public"]['Enums']["encounter_status"],"turn_index"?: number,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -196,6 +196,12 @@ isOneToOne: false
       columns: ["campaign_id"]
 isOneToOne: false
       referencedRelation: "campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "encounters_current_combatant_id_fkey"
+      columns: ["current_combatant_id"]
+isOneToOne: false
+      referencedRelation: "combatants"
       referencedColumns: ["id"]
     }
                   ]
@@ -499,10 +505,14 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"adjust_combatant_resource":
+{ Args: { "p_combatant": string,"p_delta": number,"p_resource": string,"p_set"?: number }; Returns: Json
+                           },
 "advance_turn":
 { Args: { "p_encounter": string,"p_step"?: number }; Returns: {
               "campaign_id": string,
 "created_at": string,
+"current_combatant_id": string | null,
 "id": string,
 "name": string,
 "round": number,

@@ -171,7 +171,7 @@ async function campaignTemplate(campaignId: string): Promise<{ versionId: string
 export function useCreateCharacter(campaignId: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (v: { name: string; kind?: CharacterRow['kind']; visibility?: CharacterRow['visibility'] }) => {
+    mutationFn: async (v: { name: string; kind?: CharacterRow['kind']; visibility?: CharacterRow['visibility']; library?: boolean }) => {
       const { compiled } = await campaignTemplate(campaignId);
       const data = newCharacterData(compiled);
       if (compiled.fields.has('nome')) data.values.nome = v.name;
@@ -181,13 +181,21 @@ export function useCreateCharacter(campaignId: string) {
         p_data: data as unknown as Json,
         p_kind: v.kind ?? 'pc',
         p_visibility: v.visibility ?? 'public',
+        p_is_library: v.library ?? false,
       });
       if (error) throw error;
+      // Fichas da biblioteca não passam pelo assistente: já nascem prontas.
+      if (v.library) {
+        const { data: active, error: e2 } = await supabase.from('characters').update({ status: 'active' }).eq('id', (row as { id: string }).id).select(COLUMNS).single();
+        if (e2) throw e2;
+        return active as unknown as CharacterRow;
+      }
       return row as unknown as CharacterRow;
     },
     onSuccess: (row) => {
       acceptServerRow(row);
       void qc.invalidateQueries({ queryKey: characterKeys.list(campaignId) });
+      void qc.invalidateQueries({ queryKey: ['library', campaignId] });
     },
   });
 }

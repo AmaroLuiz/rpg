@@ -6,6 +6,7 @@ import { ListField } from './ListField';
 import { NotesField } from './Notes';
 import { PortraitPicker } from './Portrait';
 import { ResourceField } from './Resource';
+import { RollButtons } from './RollButtons';
 
 /** Desenha um item do layout do template: campo, lista ou bloco especial ($conditions, $inventory, $notes). */
 export function FieldView({ id }: { id: string }) {
@@ -14,7 +15,7 @@ export function FieldView({ id }: { id: string }) {
   if (id === '$conditions') return <ConditionsField />;
   if (id === '$inventory') return <InventoryField />;
   if (id === '$notes') return <NotesField campaignId={campaignId} />;
-  if (id.startsWith('$rolls')) return null; // rolagens chegam no M5
+  if (id.startsWith('$rolls')) return <RollButtons category={id.split(':')[1] ?? ''} />;
 
   const list = compiled.lists.get(id);
   if (list) return <ListField list={list} />;

@@ -15,6 +15,8 @@ import { Join } from './pages/Join';
 import { Login } from './pages/Login';
 import { NewCampaign } from './pages/NewCampaign';
 import { Profile } from './pages/Profile';
+import { Rolls } from './pages/Rolls';
+import { Combat } from './pages/Combat';
 
 
 const router = createBrowserRouter([
@@ -31,6 +33,8 @@ const router = createBrowserRouter([
       { path: '/mesas/:id', element: <Campaign /> },
       { path: '/mesas/:id/personagens/:charId', element: <CharacterSheet /> },
       { path: '/mesas/:id/personagens/:charId/criar', element: <CreateCharacter /> },
+      { path: '/mesas/:id/rolagens', element: <Rolls /> },
+      { path: '/mesas/:id/combate', element: <Combat /> },
       { path: '/convite/:code', element: <Join /> },
       { path: '/perfil', element: <Profile /> },
     ],

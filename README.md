@@ -13,7 +13,8 @@ Documento de arquitetura e modelo de dados: https://claude.ai/artifact/7NpTy27nT
 | M2 — Fundação | Pronto: banco com RLS, login por e-mail (Google pronto no código, falta configurar o OAuth), criar mesa, convite por código e link, papéis, presença e atualização ao vivo |
 | M3 — Ficha | Pronto: ficha gerada pelo template (abas, seções, listas), recursos com +/−, condições, origem de cada número, avisos, notas, fila offline que sobrevive a fechar o app, edição ao vivo entre mestre e jogador |
 | M4 — Criação | Pronto: assistente passo a passo definido pelo template, atributos por pontos / rolagem / manual com ajuste de raça, rascunho retomado, revisão com avisos, modo livre, retrato |
-| M5 — Mesa (rolagens e combate) | Próximo |
+| M5 — Mesa | Pronto: rolagens no servidor (Edge Function) a partir da ficha ou livres, secreta do mestre, "só para o mestre", histórico e aviso ao vivo; biblioteca de NPCs e monstros; combate com cópias numeradas, iniciativa rolada e ordenada, turnos e rodadas, PV secreto de inimigos com estado público, esconder combatentes |
+| M6 — Mestre (inventário, loot, handouts, diário) | Próximo |
 
 ## Estrutura
 
@@ -23,6 +24,8 @@ packages/templates   ordem-paranormal.json, tormenta20.json
 apps/web             app React (Vite, Tailwind, TanStack Query, supabase-js)
 supabase/migrations  esquema, RLS, funções e templates embutidos
 supabase/test        testes do banco (Postgres temporário que imita o Supabase)
+supabase/functions-src  fonte da Edge Function de rolagem (regra testável + entrada Deno)
+supabase/functions   pacote gerado por `pnpm build:functions` (motor + supabase-js num arquivo)
 scripts/             gerador da migração de templates
 ```
 
@@ -48,6 +51,10 @@ pnpm e2e         # fluxos da mesa e da ficha no navegador; precisa do Supabase l
 
 Os testes do banco usam o Postgres instalado na máquina (`/usr/lib/postgresql/*/bin`). Para usar outro, defina `TEST_DATABASE_URL` apontando para um banco vazio.
 
+## Mudou a Edge Function?
+
+Edite `supabase/functions-src/roll/` e rode `pnpm build:functions`. O Supabase local recarrega sozinho; em produção, `pnpm supabase functions deploy roll`.
+
 ## Mudou um template?
 
 Suba o `version` no JSON e gere uma migração nova com `node scripts/gen-template-migration.mjs supabase/migrations/<data>_templates_vN.sql`. Um teste falha se o JSON e a migração ficarem diferentes. Fichas existentes continuam na versão em que foram criadas.
@@ -57,7 +64,8 @@ Suba o `version` no JSON e gere uma migração nova com `node scripts/gen-templa
 1. Crie um projeto no [Supabase](https://supabase.com) e rode `pnpm supabase link --project-ref <ref>` e `pnpm supabase db push`.
 2. Em Authentication → URL Configuration, coloque o endereço do app em Site URL e em Redirect URLs.
 3. Para login com Google: crie um OAuth Client no Google Cloud e ative o provedor Google em Authentication → Providers.
-4. Publique `apps/web` na Vercel ou Cloudflare Pages (build `pnpm build`, saída `apps/web/dist`) com `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` do projeto. Configure o fallback de SPA para `index.html`.
+4. Publique a função de rolagem: `pnpm build:functions && pnpm supabase functions deploy roll`.
+5. Publique `apps/web` na Vercel ou Cloudflare Pages (build `pnpm build`, saída `apps/web/dist`) com `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` do projeto. Configure o fallback de SPA para `index.html`.
 
 ## Linguagem de fórmulas
 

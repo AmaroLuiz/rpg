@@ -134,7 +134,7 @@ export function CharacterSheet() {
       <div role="tabpanel" aria-label={current.label} className="flex flex-col gap-3">
         {current.sections.map((s) => {
           // Recursos já ficam fixos no topo da ficha; não repetir dentro das abas.
-          const shown = s.items.filter((itemId) => !resourceIds.has(itemId) && !itemId.startsWith('$rolls'));
+          const shown = s.items.filter((itemId) => !resourceIds.has(itemId));
           if (!shown.length) return null;
           return (
             <Section key={s.id} label={s.label} collapsible={s.collapsible}>

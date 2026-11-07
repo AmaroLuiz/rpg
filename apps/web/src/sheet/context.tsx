@@ -6,6 +6,8 @@ export interface SheetCtx {
   sheet: Sheet;
   data: CharacterData;
   canEdit: boolean;
+  /** Quem está vendo é o mestre da mesa (pode rolar em segredo). */
+  isGm: boolean;
   change(ops: CharacterOp[]): void;
   characterId: string;
   campaignId: string;

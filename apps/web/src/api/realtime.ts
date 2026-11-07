@@ -2,7 +2,9 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useEffect, useSyncExternalStore } from 'react';
 import { supabase } from '../lib/supabase';
+import { announceRoll } from '../roller/RollToasts';
 import { acceptServerRow, characterKeys, type CharacterRow } from './characters';
+import type { RollRow } from './rolls';
 
 /**
  * Um canal Realtime por mesa, compartilhado por todas as telas dela.
@@ -37,10 +39,24 @@ function open(campaignId: string, userId: string, qc: QueryClient): Entry {
   channel.on('postgres_changes', { event: '*', schema: 'public', table: 'characters', filter: byCampaign }, (payload) => {
     if (payload.eventType !== 'DELETE') acceptServerRow(payload.new as CharacterRow);
     void qc.invalidateQueries({ queryKey: characterKeys.list(campaignId) });
+    void qc.invalidateQueries({ queryKey: ['library', campaignId] });
   });
   channel.on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: byCampaign }, () => {
     void qc.invalidateQueries({ queryKey: ['character-items'] });
   });
+  channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rolls', filter: byCampaign }, (payload) => {
+    void qc.invalidateQueries({ queryKey: ['rolls', campaignId] });
+    // O nome de quem rolou vem do cache de membros da mesa.
+    const members = qc.getQueryData<{ members: Array<{ user_id: string; profile: { display_name: string } | null }> }>(['campaigns', campaignId])?.members;
+    const row = payload.new as RollRow;
+    const author = members?.find((m) => m.user_id === row.user_id)?.profile ?? null;
+    announceRoll({ ...row, author });
+  });
+  for (const table of ['encounters', 'combatants', 'combatant_secrets'] as const) {
+    channel.on('postgres_changes', { event: '*', schema: 'public', table, filter: byCampaign }, () => {
+      void qc.invalidateQueries({ queryKey: ['combat', campaignId] });
+    });
+  }
   channel.on('postgres_changes', { event: '*', schema: 'public', table: 'notes', filter: byCampaign }, () => {
     void qc.invalidateQueries({ queryKey: ['notes', campaignId] });
   });

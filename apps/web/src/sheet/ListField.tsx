@@ -1,11 +1,12 @@
 import { newListKey, type FieldResult, type ListDef, type SubFieldDef } from '@rpg/engine';
-import { ChevronDown, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Dices, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button, cx } from '../components/ui';
 import { useSheetCtx } from './context';
 import { NumberInput, selectOptions, SelectInput, TextInput, Toggle, ValueWithBreakdown } from './fields';
 import { formatValue } from './format';
+import { shortLabel, useRollAction } from './RollButtons';
 
 function defaultOf(f: SubFieldDef) {
   if ('default' in f && f.default !== undefined) return f.default;
@@ -27,6 +28,8 @@ export function ListField({ list }: { list: ListDef }) {
   const inline = list.fields.filter((f) => f.type === 'select' || f.type === 'checkbox');
   const detail = list.fields.filter((f) => f.type !== 'computed' && f.type !== 'select' && f.type !== 'checkbox' && f.id !== list.titleField);
   const path = (key: string, sub: string) => ['lists', list.id, 'items', key, sub];
+  const rollAction = useRollAction();
+  const listRolls = compiled.template.rolls.filter((r) => r.list === list.id);
   const set = (key: string, sub: string, value: unknown) => change([{ op: 'set', path: path(key, sub), value }]);
 
   const add = () => {
@@ -72,6 +75,22 @@ export function ListField({ list }: { list: ListDef }) {
                   <span className="truncate">{title}</span>
                 </button>
                 {primary && <ValueWithBreakdown result={item.values[primary.id] as FieldResult} format={primary.type === 'computed' ? primary.format : undefined} label={`${title} ${primary.label}`} />}
+                {rollAction.canRoll &&
+                  listRolls.map((r) => {
+                    const short = shortLabel(r);
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => rollAction.roll(r, item.key)}
+                        aria-label={t('roller.rollThis', { label: short ? `${short}: ${title}` : title })}
+                        className="flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-xl bg-accent-soft px-2.5 text-sm font-medium text-accent"
+                      >
+                        <Dices className="size-5" aria-hidden />
+                        {short && <span>{short}</span>}
+                      </button>
+                    );
+                  })}
               </div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-5 text-sm text-muted">
                 {inline.map((f) =>

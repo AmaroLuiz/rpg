@@ -67,6 +67,21 @@ describe('combatentes', () => {
     expect(await as(t.players[0]!, (q) => q('select * from public.combatant_secrets'))).toEqual([]);
   });
 
+  it('dano rápido em inimigo soma sem perder toques; só o mestre pode', async () => {
+    const t = await createTable();
+    const enc = await encounter(t.gm, t.campaign);
+    const zumbi = await createCharacter(t.gm, t.campaign, { name: 'Zumbi', kind: 'monster', visibility: 'gm' });
+    const [z] = await add(t.gm, enc, zumbi, 1, 20);
+    const adj = (uid: string, delta: number, set: number | null = null) =>
+      as(uid, (q) => q('select public.adjust_combatant_resource($1, $2, $3, $4)', [z!.id, 'pv', delta, set]));
+    await Promise.all(Array.from({ length: 7 }, () => adj(t.gm, -1)));
+    const pv = async () => (await admin<{ resources: { pv: { atual: number } } }>('select resources from public.combatant_secrets where combatant_id = $1', [z!.id]))[0]!.resources.pv.atual;
+    expect(await pv()).toBe(13);
+    await adj(t.gm, 0, 4);
+    expect(await pv()).toBe(4);
+    await expectPgError(adj(t.players[0]!, -1), '42501');
+  });
+
   it('mesa com PV de inimigo escondido não mostra nem o estado', async () => {
     const t = await createTable();
     await as(t.gm, (q) => q(`update public.campaigns set settings = '{"enemy_hp": "hidden"}' where id = $1`, [t.campaign]));
@@ -113,6 +128,22 @@ describe('iniciativa e turnos', () => {
     expect(await turn(t.gm, enc)).toMatchObject({ round: 2, turn_index: 0 });
     expect(await turn(t.gm, enc, -1)).toMatchObject({ round: 1, turn_index: 2 });
     expect(await order(t.players[0]!, enc)).toEqual(['Zumbi 2', 'Zumbi 1', 'Zumbi 3']);
+  });
+
+  it('quem age é guardado pelo id, para o jogador destacar certo mesmo com escondidos', async () => {
+    const { t, enc } = await setup();
+    const zumbi = (await admin<{ character_id: string }>('select character_id from public.combatants where encounter_id = $1 limit 1', [enc]))[0]!.character_id;
+    const [hidden] = await add(t.gm, enc, zumbi, 1, 10, true);
+    await as(t.gm, (q) => q('update public.combatants set initiative = 99 where id = $1', [hidden!.id]));
+    await as(t.gm, (q) => q('select public.sort_initiative($1)', [enc]));
+    await turn(t.gm, enc); // começa: o escondido (iniciativa 99) age primeiro
+    const current = async () =>
+      (await as(t.players[0]!, (q) => q<{ current_combatant_id: string | null }>('select current_combatant_id from public.encounters where id = $1', [enc])))[0]!.current_combatant_id;
+    expect(await current()).toBe(hidden!.id);
+    expect((await order(t.players[0]!, enc))).not.toContain(hidden!.label);
+    await turn(t.gm, enc);
+    const [z2] = await as(t.players[0]!, (q) => q<{ id: string }>(`select id from public.combatants where encounter_id = $1 and label = 'Zumbi 2'`, [enc]));
+    expect(await current()).toBe(z2!.id);
   });
 
   it('jogador não avança turno; combate vazio não começa', async () => {
