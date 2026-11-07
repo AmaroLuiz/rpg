@@ -5,6 +5,7 @@ export type EngineErrorCode =
   | 'bad-argument'
   | 'type'
   | 'cycle'
+  | 'dependency'
   | 'dice-not-allowed'
   | 'dice-limit'
   | 'template-invalid';

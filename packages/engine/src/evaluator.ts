@@ -123,10 +123,11 @@ const BUILTINS: Record<string, (args: Value[]) => Value> = {
   },
 };
 
-export const BUILTIN_FUNCTIONS = [...Object.keys(BUILTINS), 'if'];
+export const BUILTIN_FUNCTIONS = [...Object.keys(BUILTINS), 'if', 'roll'];
 
 class Evaluator {
   readonly dice: DiceGroupResult[] = [];
+  private depth = 0;
   constructor(private readonly ctx: EvalContext) {}
 
   run(node: Node): Out {
@@ -185,6 +186,17 @@ class Evaluator {
         return { v: member(obj.v, node.property), s: `${obj.s}.${node.property}` };
       }
       case 'call': {
+        if (node.name === 'roll') {
+          // roll("1d8+2"): rola uma expressão guardada como texto (ex.: o dano de uma arma).
+          if (node.args.length !== 1) throw new EngineError('bad-argument', 'roll() espera 1 argumento');
+          if (!this.ctx.rng) throw new EngineError('dice-not-allowed', 'roll() só pode ser usado em rolagens');
+          const src = this.run(node.args[0]!).v;
+          if (typeof src !== 'string' || !src.trim()) return { v: 0, s: '0' };
+          if (++this.depth > 3) throw new EngineError('bad-argument', 'roll() aninhado demais');
+          const inner = this.run(parse(src));
+          this.depth--;
+          return inner;
+        }
         if (node.name === 'if') {
           if (node.args.length !== 3) throw new EngineError('bad-argument', 'if() espera 3 argumentos');
           const test = this.run(node.args[0]!);

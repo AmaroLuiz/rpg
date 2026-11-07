@@ -132,6 +132,14 @@ describe('dados', () => {
     expect(roll('1d6 != 3', [3]).value).toBe(false);
   });
 
+  it('roll() rola uma expressão guardada como texto', () => {
+    const r = roll('roll(@dano) + 1', [5, 2], { dano: '2d6' });
+    expect(r.value).toBe(8);
+    expect(r.text).toBe('2d6 [5, 2] + 1');
+    expect(roll('roll(@dano)', [1], { dano: '' }).value).toBe(0);
+    expect(errorCode(() => val('roll("1d6")'))).toBe('dice-not-allowed');
+  });
+
   it('limites de quantidade', () => {
     expect(errorCode(() => roll('101d6', [1]))).toBe('dice-limit');
     expect(errorCode(() => roll('1d1001', [1]))).toBe('dice-limit');
