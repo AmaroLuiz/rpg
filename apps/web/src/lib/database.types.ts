@@ -479,7 +479,44 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "apply_character_ops":
+            "add_combatants":
+{ Args: { "p_character": string,"p_count"?: number,"p_encounter": string,"p_hidden"?: boolean,"p_resources"?: Json }; Returns: {
+              "campaign_id": string,
+"character_id": string | null,
+"conditions": NonNullable<Json>,
+"created_at": string,
+"encounter_id": string,
+"hidden": boolean,
+"id": string,
+"initiative": number | null,
+"label": string,
+"order_index": number,
+"public_status": string | null
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "combatants"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
+"advance_turn":
+{ Args: { "p_encounter": string,"p_step"?: number }; Returns: {
+              "campaign_id": string,
+"created_at": string,
+"id": string,
+"name": string,
+"round": number,
+"status": Database["public"]['Enums']["encounter_status"],
+"turn_index": number,
+"updated_at": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "encounters"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"apply_character_ops":
 { Args: { "p_character": string,"p_op_id": string,"p_ops": Json }; Returns: Json
                            },
 "create_campaign":
@@ -528,6 +565,9 @@ isOneToOne: false
                            },
 "regenerate_invite_code":
 { Args: { "p_campaign": string }; Returns: string
+                           },
+"sort_initiative":
+{ Args: { "p_encounter": string }; Returns: undefined
                            }
           }
           Enums: {

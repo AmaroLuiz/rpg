@@ -8,12 +8,21 @@ importers:
 
   .:
     devDependencies:
+      '@rpg/engine':
+        specifier: workspace:*
+        version: link:packages/engine
+      '@supabase/supabase-js':
+        specifier: ^2.119.0
+        version: 2.119.0
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6
       '@types/pg':
         specifier: ^8.23.1
         version: 8.23.1
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
       pg:
         specifier: ^8.23.1
         version: 8.23.1
@@ -26,6 +35,9 @@ importers:
       vitest:
         specifier: ^3.2.0
         version: 3.2.7(@types/node@26.6.6)(jiti@2.7.0)(lightningcss@1.33.0)
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
   apps/web:
     dependencies:

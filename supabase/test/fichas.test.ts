@@ -293,7 +293,8 @@ describe('combate', () => {
     const view = async (uid: string) => as(uid, (q) => q<{ label: string; public_status: string }>('select label, public_status from public.combatants order by label'));
     expect(await view(t.players[0]!)).toEqual([]);
     await as(t.gm, (q) => q(`update public.encounters set status = 'active', round = 1 where id = $1`, [enc!.id]));
-    expect(await view(t.players[0]!)).toEqual([{ label: 'Zumbi 1', public_status: 'ferido' }]);
+    // O gatilho recalcula o estado pelo PV secreto: 7 de 20 é "muito ferido".
+    expect(await view(t.players[0]!)).toEqual([{ label: 'Zumbi 1', public_status: 'muito_ferido' }]);
     expect(await view(t.gm)).toHaveLength(2);
     expect(await as(t.players[0]!, (q) => q('select * from public.combatant_secrets'))).toEqual([]);
     expect(await as(t.gm, (q) => q('select resources from public.combatant_secrets'))).toEqual([{ resources: { pv: { atual: 7, max: 20 } } }]);

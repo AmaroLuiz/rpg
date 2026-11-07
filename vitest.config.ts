@@ -17,6 +17,12 @@ export default defineConfig({
       },
       {
         test: {
+          name: 'funcoes',
+          include: ['supabase/functions-src/**/*.test.ts'],
+        },
+      },
+      {
+        test: {
           name: 'banco',
           include: ['supabase/test/**/*.test.ts'],
           globalSetup: ['supabase/test/global-setup.ts'],
