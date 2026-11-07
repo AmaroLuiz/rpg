@@ -168,6 +168,15 @@ async function campaignTemplate(campaignId: string): Promise<{ versionId: string
   return { versionId: v.id, compiled: compile(v.id, v.schema) };
 }
 
+/** Template atual da mesa (para itens da biblioteca e baús, que não têm ficha). */
+export function useCampaignTemplate(campaignId: string) {
+  return useQuery({
+    queryKey: characterKeys.campaignTemplate(campaignId),
+    staleTime: 5 * 60 * 1000,
+    queryFn: async () => (await campaignTemplate(campaignId)).compiled,
+  });
+}
+
 export function useCreateCharacter(campaignId: string) {
   const qc = useQueryClient();
   return useMutation({

@@ -17,6 +17,9 @@ import { NewCampaign } from './pages/NewCampaign';
 import { Profile } from './pages/Profile';
 import { Rolls } from './pages/Rolls';
 import { Combat } from './pages/Combat';
+import { Handouts } from './pages/Handouts';
+import { Items } from './pages/Items';
+import { Journal } from './pages/Journal';
 
 
 const router = createBrowserRouter([
@@ -35,6 +38,10 @@ const router = createBrowserRouter([
       { path: '/mesas/:id/personagens/:charId/criar', element: <CreateCharacter /> },
       { path: '/mesas/:id/rolagens', element: <Rolls /> },
       { path: '/mesas/:id/combate', element: <Combat /> },
+      { path: '/mesas/:id/itens', element: <Items /> },
+      { path: '/mesas/:id/handouts', element: <Handouts /> },
+      { path: '/mesas/:id/diario', element: <Journal mode="session" /> },
+      { path: '/mesas/:id/notas', element: <Journal mode="notes" /> },
       { path: '/convite/:code', element: <Join /> },
       { path: '/perfil', element: <Profile /> },
     ],

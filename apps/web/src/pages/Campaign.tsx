@@ -1,4 +1,4 @@
-import { Check, Copy, Crown, RefreshCw } from 'lucide-react';
+import { BookOpen, Check, Copy, Crown, Dices, Gem, NotebookPen, RefreshCw, ScrollText } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
@@ -67,6 +67,21 @@ export function Campaign() {
       {actionError && <ErrorNote>{friendlyError(actionError)}</ErrorNote>}
 
       <CombatCard campaignId={c.id} />
+
+      <nav aria-label={t('hub.tools')} className="grid grid-cols-2 gap-2">
+        {[
+          { to: 'rolagens', label: t('roller.title'), icon: Dices },
+          { to: 'itens', label: t('items.title'), icon: Gem },
+          { to: 'handouts', label: t('handouts.title'), icon: ScrollText },
+          { to: 'diario', label: t('journal.diary'), icon: BookOpen },
+          { to: 'notas', label: t('journal.notes'), icon: NotebookPen },
+        ].map(({ to, label, icon: Icon }) => (
+          <Link key={to} to={`/mesas/${c.id}/${to}`} className="flex min-h-14 items-center gap-2 rounded-2xl border border-line bg-surface px-3 font-medium hover:border-muted">
+            <Icon className="size-5 shrink-0 text-accent" aria-hidden />
+            <span className="leading-tight">{label}</span>
+          </Link>
+        ))}
+      </nav>
 
       <CharacterList campaignId={c.id} userId={userId} isGm={isGm} />
 

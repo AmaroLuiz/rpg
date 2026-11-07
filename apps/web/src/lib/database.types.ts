@@ -529,6 +529,29 @@ isOneToOne: false
 "apply_character_ops":
 { Args: { "p_character": string,"p_op_id": string,"p_ops": Json }; Returns: Json
                            },
+"copy_item":
+{ Args: { "p_holder_id"?: string,"p_holder_type": Database["public"]['Enums']["holder_type"],"p_item": string,"p_quantity"?: number }; Returns: {
+              "campaign_id": string,
+"created_at": string,
+"data": NonNullable<Json>,
+"description": string,
+"equipped": boolean,
+"holder_id": string | null,
+"holder_type": Database["public"]['Enums']["holder_type"],
+"id": string,
+"identified": boolean,
+"modifiers": NonNullable<Json>,
+"name": string,
+"quantity": number,
+"sort": number,
+"updated_at": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "items"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "create_campaign":
 { Args: { "p_description"?: string,"p_name": string,"p_template_slug": string }; Returns: {
               "created_at": string,
@@ -570,6 +593,29 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"identify_item":
+{ Args: { "p_item": string }; Returns: {
+              "campaign_id": string,
+"created_at": string,
+"data": NonNullable<Json>,
+"description": string,
+"equipped": boolean,
+"holder_id": string | null,
+"holder_type": Database["public"]['Enums']["holder_type"],
+"id": string,
+"identified": boolean,
+"modifiers": NonNullable<Json>,
+"name": string,
+"quantity": number,
+"sort": number,
+"updated_at": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "items"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "join_campaign":
 { Args: { "p_code": string }; Returns: string
                            },
@@ -578,7 +624,30 @@ isOneToOne: false
                            },
 "sort_initiative":
 { Args: { "p_encounter": string }; Returns: undefined
-                           }
+                           },
+"take_loot_item":
+{ Args: { "p_character": string,"p_item": string }; Returns: {
+              "campaign_id": string,
+"created_at": string,
+"data": NonNullable<Json>,
+"description": string,
+"equipped": boolean,
+"holder_id": string | null,
+"holder_type": Database["public"]['Enums']["holder_type"],
+"id": string,
+"identified": boolean,
+"modifiers": NonNullable<Json>,
+"name": string,
+"quantity": number,
+"sort": number,
+"updated_at": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "items"
+        isOneToOne: true
+        isSetofReturn: false
+      } }
           }
           Enums: {
             "character_kind": "pc"|"npc"|"monster","character_status": "draft"|"active"|"archived","character_visibility": "public"|"gm","encounter_status": "prep"|"active"|"ended","holder_type": "character"|"loot"|"library"|"party","loot_mode": "distribute"|"free_pick","member_role": "gm"|"player","note_visibility": "private"|"gm"|"public","roll_visibility": "public"|"gm"|"self_gm"

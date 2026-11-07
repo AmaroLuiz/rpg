@@ -2,7 +2,7 @@ import type { RealtimeChannel } from '@supabase/supabase-js';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useEffect, useSyncExternalStore } from 'react';
 import { supabase } from '../lib/supabase';
-import { announceRoll } from '../roller/RollToasts';
+import { announceInfo, announceRoll } from '../roller/RollToasts';
 import { acceptServerRow, characterKeys, type CharacterRow } from './characters';
 import type { RollRow } from './rolls';
 
@@ -43,6 +43,30 @@ function open(campaignId: string, userId: string, qc: QueryClient): Entry {
   });
   channel.on('postgres_changes', { event: '*', schema: 'public', table: 'items', filter: byCampaign }, () => {
     void qc.invalidateQueries({ queryKey: ['character-items'] });
+    void qc.invalidateQueries({ queryKey: ['items', campaignId] });
+  });
+  channel.on('postgres_changes', { event: '*', schema: 'public', table: 'loot_pools', filter: byCampaign }, () => {
+    void qc.invalidateQueries({ queryKey: ['loot', campaignId] });
+    void qc.invalidateQueries({ queryKey: ['items', campaignId] });
+  });
+  // Handout revelado chega a quem pode ver (RLS); para jogadores, mostra um aviso.
+  const handoutArrived = (title?: string) => {
+    void qc.invalidateQueries({ queryKey: ['handouts', campaignId] });
+    const camp = qc.getQueryData<{ members: Array<{ user_id: string; role: string }> }>(['campaigns', campaignId]);
+    const me = camp?.members.find((m) => m.user_id === userId);
+    if (me && me.role !== 'gm' && title) announceInfo(`handout:${title}`);
+  };
+  channel.on('postgres_changes', { event: '*', schema: 'public', table: 'handouts', filter: byCampaign }, (payload) => {
+    const row = payload.new as { title?: string; revealed_to_all?: boolean; revealed_at?: string | null } | undefined;
+    const old = payload.old as { revealed_to_all?: boolean } | undefined;
+    handoutArrived(row?.revealed_to_all && !old?.revealed_to_all ? row.title : undefined);
+  });
+  channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'handout_recipients', filter: byCampaign }, (payload) => {
+    const handoutId = (payload.new as { handout_id: string }).handout_id;
+    void qc.invalidateQueries({ queryKey: ['handouts', campaignId] }).then(() => {
+      const list = qc.getQueryData<Array<{ id: string; title: string }>>(['handouts', campaignId]);
+      handoutArrived(list?.find((h) => h.id === handoutId)?.title ?? '');
+    });
   });
   channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rolls', filter: byCampaign }, (payload) => {
     void qc.invalidateQueries({ queryKey: ['rolls', campaignId] });

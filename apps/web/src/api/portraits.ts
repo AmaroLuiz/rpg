@@ -2,12 +2,10 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 import { useUpdateCharacterMeta } from './characters';
 
-const MAX = 512;
-
-/** Reduz a foto no próprio aparelho (lado maior 512 px, WebP): sobe rápido mesmo com rede ruim. */
-export async function resizeImage(file: Blob): Promise<Blob> {
+/** Reduz a imagem no próprio aparelho (WebP, lado maior até `max`): sobe rápido mesmo com rede ruim. */
+export async function resizeImage(file: Blob, max = 512): Promise<Blob> {
   const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
+  const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
   const w = Math.round(bitmap.width * scale);
   const h = Math.round(bitmap.height * scale);
   const canvas = document.createElement('canvas');

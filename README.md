@@ -14,7 +14,8 @@ Documento de arquitetura e modelo de dados: https://claude.ai/artifact/7NpTy27nT
 | M3 — Ficha | Pronto: ficha gerada pelo template (abas, seções, listas), recursos com +/−, condições, origem de cada número, avisos, notas, fila offline que sobrevive a fechar o app, edição ao vivo entre mestre e jogador |
 | M4 — Criação | Pronto: assistente passo a passo definido pelo template, atributos por pontos / rolagem / manual com ajuste de raça, rascunho retomado, revisão com avisos, modo livre, retrato |
 | M5 — Mesa | Pronto: rolagens no servidor (Edge Function) a partir da ficha ou livres, secreta do mestre, "só para o mestre", histórico e aviso ao vivo; biblioteca de NPCs e monstros; combate com cópias numeradas, iniciativa rolada e ordenada, turnos e rodadas, PV secreto de inimigos com estado público, esconder combatentes |
-| M6 — Mestre (inventário, loot, handouts, diário) | Próximo |
+| M6 — Mestre | Pronto: inventário editável com carga e bônus ao equipar, biblioteca de itens, baús revelados na hora certa (mestre distribui ou cada um pega), item misterioso identificado depois, handouts com imagem para todos ou para escolhidos, diário de sessões e notas com busca em português e etiquetas |
+| M7 — Refinamento | Próximo |
 
 ## Estrutura
 
