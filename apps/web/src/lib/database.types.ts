@@ -361,6 +361,96 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"map_marks": {
+                  Row: {
+                    "author_id": string,"campaign_id": string,"color": string,"created_at": string,"data": NonNullable<Json>,"gm_only": boolean,"id": string,"kind": string,"map_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id": string,"campaign_id": string,"color"?: string,"created_at"?: string,"data"?: NonNullable<Json>,"gm_only"?: boolean,"id"?: string,"kind": string,"map_id": string
+                  }
+                  Update: {
+                    "author_id"?: string,"campaign_id"?: string,"color"?: string,"created_at"?: string,"data"?: NonNullable<Json>,"gm_only"?: boolean,"id"?: string,"kind"?: string,"map_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "map_marks_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "map_marks_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "map_marks_map_id_fkey"
+      columns: ["map_id"]
+isOneToOne: false
+      referencedRelation: "maps"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"map_tokens": {
+                  Row: {
+                    "campaign_id": string,"character_id": string | null,"color": string,"combatant_id": string | null,"created_at": string,"hidden": boolean,"id": string,"label": string,"map_id": string,"size": number,"updated_at": string,"x": number,"y": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "campaign_id": string,"character_id"?: string | null,"color"?: string,"combatant_id"?: string | null,"created_at"?: string,"hidden"?: boolean,"id"?: string,"label": string,"map_id": string,"size"?: number,"updated_at"?: string,"x"?: number,"y"?: number
+                  }
+                  Update: {
+                    "campaign_id"?: string,"character_id"?: string | null,"color"?: string,"combatant_id"?: string | null,"created_at"?: string,"hidden"?: boolean,"id"?: string,"label"?: string,"map_id"?: string,"size"?: number,"updated_at"?: string,"x"?: number,"y"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "map_tokens_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "map_tokens_character_id_fkey"
+      columns: ["character_id"]
+isOneToOne: false
+      referencedRelation: "characters"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "map_tokens_combatant_id_fkey"
+      columns: ["combatant_id"]
+isOneToOne: false
+      referencedRelation: "combatants"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "map_tokens_map_id_fkey"
+      columns: ["map_id"]
+isOneToOne: false
+      referencedRelation: "maps"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"maps": {
+                  Row: {
+                    "active": boolean,"campaign_id": string,"cell_meters": number,"cell_px": number,"cols": number,"created_at": string,"diagonal": string,"fog": string,"fog_enabled": boolean,"id": string,"image_h": number,"image_path": string | null,"image_w": number,"name": string,"offset_x": number,"offset_y": number,"revealed": boolean,"rows": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "active"?: boolean,"campaign_id": string,"cell_meters"?: number,"cell_px"?: number,"cols"?: number,"created_at"?: string,"diagonal"?: string,"fog"?: string,"fog_enabled"?: boolean,"id"?: string,"image_h"?: number,"image_path"?: string | null,"image_w"?: number,"name": string,"offset_x"?: number,"offset_y"?: number,"revealed"?: boolean,"rows"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "active"?: boolean,"campaign_id"?: string,"cell_meters"?: number,"cell_px"?: number,"cols"?: number,"created_at"?: string,"diagonal"?: string,"fog"?: string,"fog_enabled"?: boolean,"id"?: string,"image_h"?: number,"image_path"?: string | null,"image_w"?: number,"name"?: string,"offset_x"?: number,"offset_y"?: number,"revealed"?: boolean,"rows"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "maps_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "campaigns"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"notes": {
                   Row: {
                     "author_id": string,"body": string,"campaign_id": string,"created_at": string,"folder_id": string | null,"id": string,"kind": string,"search": unknown,"session_date": string | null,"tags": (string)[],"title": string,"updated_at": string,"visibility": Database["public"]['Enums']["note_visibility"]
@@ -621,6 +711,9 @@ isOneToOne: false
                            },
 "regenerate_invite_code":
 { Args: { "p_campaign": string }; Returns: string
+                           },
+"set_active_map":
+{ Args: { "p_campaign": string,"p_map": string }; Returns: undefined
                            },
 "sort_initiative":
 { Args: { "p_encounter": string }; Returns: undefined

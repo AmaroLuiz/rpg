@@ -4,6 +4,43 @@ Cole tudo abaixo numa sessão nova do Claude Code aberta na raiz do projeto `rpg
 
 ---
 
+## ESTADO ATUAL (atualizado em 08/11/2026, branch `feat/mapas`)
+
+**Pronto e testado — não refaça:**
+
+- `supabase/migrations/20261108000007_maps.sql`: tabelas `maps`, `map_tokens` e `map_marks`; RPC `set_active_map`; triggers de guarda, herança de mesa e "tocar o mapa"; `private.token_visible`; RLS; bucket `maps`; publicação no tempo real. Já aplicada no Supabase local.
+  - Detalhe: a guarda dos tokens roda antes da herança de `campaign_id`, por isso usa `m.campaign_id` do mapa.
+  - No insert de token ou marca, o `campaign_id` enviado é sobrescrito pelo do mapa, mas a coluna é `not null`: envie o `campaign_id` da mesa.
+- `supabase/test/mapas.test.ts`: 7 testes cobrindo visibilidade, mapa ativo, jogador movendo só o próprio token, limites do grid, névoa, combatente escondido, toque no mapa e marcas `gm_only`. Os 66 testes do banco passam.
+- `supabase/test/global-setup.ts`: corrigido para Windows (`fileURLToPath`).
+- `apps/web/src/lib/database.types.ts`: regenerado com as tabelas novas.
+- `apps/web/src/map/geometry.ts` + `apps/web/test/map-geometry.test.ts` (15 testes passando): `cellAt`, `toCellSpace`, `toImageSpace`, `cellRect`, `snapToken`, `distanceCells`, `distanceMeters`, `formatMeters`, `areaCells` (circle/cone/line, `CONE_ANGLE` = 90), `tokensInCells`, `paintFog`, `fillFog`, `isRevealed`, `tokenVisible`, `freeSpots`, `simplifyStroke`.
+- `tsc -p apps/web` passa.
+
+**Como rodar os testes do banco neste Windows:**
+
+```bash
+docker exec supabase_db_rpg psql -U postgres -c "drop database if exists rpg_test" -c "create database rpg_test"
+```
+
+```bash
+TEST_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/rpg_test npx vitest run --project banco
+```
+
+**Falta fazer (nesta ordem):**
+
+1. `apps/web/src/api/maps.ts` (hooks e ações) + cache da imagem na Cache Storage + limpar o cache em `forgetEverything`.
+2. Handlers no `api/realtime.ts`.
+3. Strings `maps` no `pt-BR.ts`.
+4. Página de lista `/mesas/:id/mapas` + `MapCard` e atalho no hub.
+5. Quadro `/mesas/:id/mapas/:mapId` com pan/zoom e ferramentas.
+6. Painel do token.
+7. Exportar campanha.
+8. README.
+9. Verificação no navegador com duas contas e e2e opcional.
+
+---
+
 Implemente uma feature nova no projeto **rpg-mesa**: **mapas com grid para posicionar os personagens**, integrada ao sistema que já existe, como se sempre tivesse feito parte dele. O escopo já foi definido com o usuário (decisões abaixo). Não faça mais perguntas de escopo: estude o código, implemente, teste e verifique no navegador.
 
 ## Contexto do projeto (já estudado)
