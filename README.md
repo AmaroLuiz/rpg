@@ -141,4 +141,13 @@ sheet.warnings();                // avisos, nunca bloqueiam
 sheet.roll('pericia', { rng: cryptoRng(), itemKey: 'luta', bonus: 2 });
 ```
 
-Os números dos templates (PV por classe, bônus de treino, condições) devem ser conferidos com os livros. Os templates não trazem textos dos livros; descrições de origens, poderes, rituais e magias ficam a cargo de cada mesa.
+Os números dos templates (PV por classe, bônus de treino, condições) devem ser conferidos com os livros.
+
+## Livro (compêndio)
+
+Ordem Paranormal tem o conteúdo do livro de regras (versão 0.2) organizado em `packages/templates/src/compendium/ordem-paranormal/`: 80 rituais, poderes de classe e paranormais, habilidades e as 15 trilhas, 24 origens, armas, munições, proteções, modificações, equipamentos gerais, maldições, itens amaldiçoados e criaturas. Cada entrada traz nome, números e regras do livro (custo, círculo, execução, alcance, dano, crítico, categoria, espaços...), um resumo próprio do efeito e a página do livro — o texto integral não é copiado.
+
+- Página "Livro" da mesa: busca, abas por tipo e filtros (elemento, círculo, classe, tipo de arma...).
+- Na ficha: "Do livro" nas listas de rituais, poderes e ataques e no inventário; "Escolher do livro" em origem (preenche, treina as duas perícias e adiciona o poder) e trilha (adiciona as habilidades até o NEX atual).
+- Onde o livro se contradiz (Tabela 1.1 de origens × texto, nomes de munição), vale o texto descritivo e a entrada avisa.
+- Para outro sistema, crie os arquivos em `compendium/<sistema>/` e registre em `compendium/index.ts`.

@@ -24,6 +24,7 @@ const Handouts = lazy(() => import('./pages/Handouts').then((m) => ({ default: m
 const Items = lazy(() => import('./pages/Items').then((m) => ({ default: m.Items })));
 const Maps = lazy(() => import('./pages/Maps').then((m) => ({ default: m.Maps })));
 const MapBoard = lazy(() => import('./pages/MapBoard').then((m) => ({ default: m.MapBoard })));
+const Compendium = lazy(() => import('./pages/Compendium').then((m) => ({ default: m.Compendium })));
 const Journal = lazy(() => import('./pages/Journal').then((m) => ({ default: m.Journal })));
 
 const router = createBrowserRouter([
@@ -46,6 +47,7 @@ const router = createBrowserRouter([
       { path: '/mesas/:id/handouts', element: <Handouts /> },
       { path: '/mesas/:id/mapas', element: <Maps /> },
       { path: '/mesas/:id/mapas/:mapId', element: <MapBoard /> },
+      { path: '/mesas/:id/livro', element: <Compendium /> },
       { path: '/mesas/:id/diario', element: <Journal mode="session" /> },
       { path: '/mesas/:id/notas', element: <Journal mode="notes" /> },
       { path: '/convite/:code', element: <Join /> },

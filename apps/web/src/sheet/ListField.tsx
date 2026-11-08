@@ -1,7 +1,9 @@
 import { newListKey, type FieldResult, type ListDef, type SubFieldDef } from '@rpg/engine';
-import { ChevronDown, Dices, Plus, Trash2 } from 'lucide-react';
+import { compendiumFor, listItemFrom, type CompendiumEntry } from '@rpg/templates/compendium';
+import { BookOpen, ChevronDown, Dices, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CompendiumDialog } from '../compendium/CompendiumDialog';
 import { Button, cx } from '../components/ui';
 import { useSheetCtx } from './context';
 import { NumberInput, selectOptions, SelectInput, TextInput, Toggle, ValueWithBreakdown } from './fields';
@@ -20,6 +22,9 @@ export function ListField({ list }: { list: ListDef }) {
   const { t } = useTranslation();
   const { compiled, sheet, data, canEdit, change } = useSheetCtx();
   const [open, setOpen] = useState<string | null>(null);
+  const [book, setBook] = useState(false);
+  const compendium = compendiumFor(compiled.template.id);
+  const bookKinds = compendium?.lists[list.id];
   const items = sheet.listItems(list.id);
   const stored = data.lists[list.id] ?? { order: [], items: {} };
   const editable = canEdit && list.editable !== false;
@@ -45,6 +50,22 @@ export function ListField({ list }: { list: ListDef }) {
       { op: 'set', path: ['lists', list.id, 'order'], value: [...stored.order, key] },
     ]);
     setOpen(key);
+  };
+
+  /** Entrada do livro vira item da lista (só com os subcampos que esta versão do template tem). */
+  const addFromBook = (e: CompendiumEntry) => {
+    const key = newListKey(stored.order);
+    const values = listItemFrom(e, list.id);
+    const item: Record<string, unknown> = {};
+    for (const f of list.fields) {
+      if (f.type === 'computed') continue;
+      const v = values[f.id] ?? defaultOf(f);
+      if (v !== undefined && v !== '') item[f.id] = v;
+    }
+    change([
+      { op: 'set', path: ['lists', list.id, 'items', key], value: item },
+      { op: 'set', path: ['lists', list.id, 'order'], value: [...stored.order, key] },
+    ]);
   };
 
   const remove = (key: string, name: string) => {
@@ -161,10 +182,27 @@ export function ListField({ list }: { list: ListDef }) {
         })}
       </ul>
       {editable && (
-        <Button variant="secondary" className="mt-2" onClick={add}>
-          <Plus className="size-4" aria-hidden />
-          {t('sheet.addItem')}
-        </Button>
+        <div className={cx('mt-2 grid gap-2', bookKinds && 'grid-cols-2')}>
+          <Button variant="secondary" onClick={add}>
+            <Plus className="size-4" aria-hidden />
+            {t('sheet.addItem')}
+          </Button>
+          {bookKinds && (
+            <Button variant="secondary" onClick={() => setBook(true)}>
+              <BookOpen className="size-4" aria-hidden />
+              {t('compendium.fromBook')}
+            </Button>
+          )}
+        </div>
+      )}
+      {book && compendium && bookKinds && (
+        <CompendiumDialog
+          compendium={compendium}
+          kinds={bookKinds}
+          title={t('compendium.addTo', { list: list.label })}
+          onPick={addFromBook}
+          onClose={() => setBook(false)}
+        />
       )}
     </div>
   );

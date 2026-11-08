@@ -1,6 +1,7 @@
-import { BookOpen, Check, Copy, Crown, Dices, Download, Gem, Map as MapIcon, NotebookPen, RefreshCw, ScrollText } from 'lucide-react';
+import { BookOpen, Check, Copy, Crown, Dices, Download, Gem, Map as MapIcon, NotebookPen, RefreshCw, ScrollText, LibraryBig } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { compendiumFor } from '@rpg/templates/compendium';
 import { Link, useNavigate, useParams } from 'react-router';
 import { useCampaign, useDeleteCampaign, useRegenerateInvite, useRemoveMember } from '../api/campaigns';
 import { exportCampaign } from '../api/exporting';
@@ -79,6 +80,7 @@ export function Campaign() {
           { to: 'itens', label: t('items.title'), icon: Gem },
           { to: 'handouts', label: t('handouts.title'), icon: ScrollText },
           { to: 'diario', label: t('journal.diary'), icon: BookOpen },
+          ...(compendiumFor(c.template?.slug ?? '') ? [{ to: 'livro', label: t('compendium.title'), icon: LibraryBig }] : []),
           { to: 'notas', label: t('journal.notes'), icon: NotebookPen },
         ].map(({ to, label, icon: Icon }) => (
           <Link key={to} to={`/mesas/${c.id}/${to}`} className="flex min-h-14 items-center gap-2 rounded-2xl border border-line bg-surface px-3 font-medium hover:border-muted">
