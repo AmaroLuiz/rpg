@@ -4,6 +4,7 @@ import { useEffect, useSyncExternalStore } from 'react';
 import { supabase } from '../lib/supabase';
 import { announceInfo, announceRoll } from '../roller/RollToasts';
 import { acceptServerRow, characterKeys, type CharacterRow } from './characters';
+import { acceptTokenRow, mapKeys, type MapToken } from './maps';
 import type { RollRow } from './rolls';
 
 /**
@@ -79,8 +80,22 @@ function open(campaignId: string, userId: string, qc: QueryClient): Entry {
   for (const table of ['encounters', 'combatants', 'combatant_secrets'] as const) {
     channel.on('postgres_changes', { event: '*', schema: 'public', table, filter: byCampaign }, () => {
       void qc.invalidateQueries({ queryKey: ['combat', campaignId] });
+      // Combatente escondido ou fora do combate muda quais tokens o jogador enxerga.
+      if (table !== 'combatant_secrets') void qc.invalidateQueries({ queryKey: mapKeys.all(campaignId) });
     });
   }
+  // Mapas: mover token chega inteiro e entra direto no cache; o resto relê.
+  // Quem deixa de ver um token não recebe evento: o banco "toca" o mapa (updated_at) e todos releem.
+  channel.on('postgres_changes', { event: '*', schema: 'public', table: 'maps', filter: byCampaign }, () => {
+    void qc.invalidateQueries({ queryKey: mapKeys.all(campaignId) });
+  });
+  channel.on('postgres_changes', { event: '*', schema: 'public', table: 'map_tokens', filter: byCampaign }, (payload) => {
+    if (payload.eventType === 'UPDATE' && acceptTokenRow(qc, campaignId, payload.new as MapToken)) return;
+    void qc.invalidateQueries({ queryKey: mapKeys.all(campaignId) });
+  });
+  channel.on('postgres_changes', { event: '*', schema: 'public', table: 'map_marks', filter: byCampaign }, () => {
+    void qc.invalidateQueries({ queryKey: mapKeys.all(campaignId) });
+  });
   channel.on('postgres_changes', { event: '*', schema: 'public', table: 'notes', filter: byCampaign }, () => {
     void qc.invalidateQueries({ queryKey: ['notes', campaignId] });
   });
@@ -96,7 +111,7 @@ function open(campaignId: string, userId: string, qc: QueryClient): Entry {
       refresh();
       void qc.invalidateQueries({ queryKey: characterKeys.list(campaignId) });
       void qc.invalidateQueries({ queryKey: ['character'] });
-      for (const k of ['combat', 'rolls', 'items', 'loot', 'handouts', 'notes', 'library']) {
+      for (const k of ['combat', 'rolls', 'items', 'loot', 'handouts', 'notes', 'library', 'maps']) {
         void qc.invalidateQueries({ queryKey: [k, campaignId] });
       }
       void qc.invalidateQueries({ queryKey: ['character-items'] });

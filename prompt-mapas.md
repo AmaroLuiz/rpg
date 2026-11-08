@@ -4,6 +4,44 @@ Cole tudo abaixo numa sessão nova do Claude Code aberta na raiz do projeto `rpg
 
 ---
 
+## ESTADO ATUAL (atualizado em 08/11/2026, branch `feat/mapas`)
+
+**Pronto e testado — não refaça:**
+
+- `supabase/migrations/20261108000007_maps.sql`: tabelas `maps`, `map_tokens` e `map_marks`; RPC `set_active_map`; triggers de guarda, herança de mesa e "tocar o mapa"; `private.token_visible`; RLS; bucket `maps`; publicação no tempo real. Já aplicada no Supabase local.
+  - Detalhe: a guarda dos tokens roda antes da herança de `campaign_id`, por isso usa `m.campaign_id` do mapa.
+  - No insert de token ou marca, o `campaign_id` enviado é sobrescrito pelo do mapa, mas a coluna é `not null`: envie o `campaign_id` da mesa.
+- `supabase/test/mapas.test.ts`: 7 testes cobrindo visibilidade, mapa ativo, jogador movendo só o próprio token, limites do grid, névoa, combatente escondido, toque no mapa e marcas `gm_only`. Os 66 testes do banco passam.
+- `supabase/test/global-setup.ts`: corrigido para Windows (`fileURLToPath`).
+- `apps/web/src/lib/database.types.ts`: regenerado com as tabelas novas.
+- `apps/web/src/map/geometry.ts` + `apps/web/test/map-geometry.test.ts` (15 testes passando): `cellAt`, `toCellSpace`, `toImageSpace`, `cellRect`, `snapToken`, `distanceCells`, `distanceMeters`, `formatMeters`, `areaCells` (circle/cone/line, `CONE_ANGLE` = 90), `tokensInCells`, `paintFog`, `fillFog`, `isRevealed`, `tokenVisible`, `freeSpots`, `simplifyStroke`.
+- `tsc -p apps/web` passa.
+
+**Como rodar os testes do banco neste Windows:**
+
+```bash
+docker exec supabase_db_rpg psql -U postgres -c "drop database if exists rpg_test" -c "create database rpg_test"
+```
+
+```bash
+TEST_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/rpg_test npx vitest run --project banco
+```
+
+**Também pronto (08/11/2026, segunda sessão; sem commit até o usuário pedir):**
+
+- `api/maps.ts` (hooks, ações, movimento otimista, `acceptTokenRow` para o tempo real), `map/imageCache.ts` (imagem na Cache Storage, limpa em `forgetEverything`), handlers em `api/realtime.ts` (combate também invalida os mapas), strings `maps` no `pt-BR.ts`, `lib/useOnline.ts`.
+- Telas: `pages/Maps.tsx` (lista; mapa novo abre no ajuste do grid com `?ajustar=1`), `pages/MapCard.tsx` + atalho no hub, `pages/MapBoard.tsx` (quadro), `map/layers.tsx` (grid, névoa, marcas, tokens) e `map/panels.tsx` (token, colocar, grid, névoa, área, desenho, alfinete, marca).
+- `resizeFog` em `geometry.ts` (+ teste). Exportar campanha leva `maps`, `map_tokens` e `map_marks`. README com a linha do M8, a seção Mapas e a limitação da névoa.
+- Verificado no navegador embutido com mestre (localhost) e jogador (127.0.0.1), celular 375×812: upload, alinhar o grid arrastando e pelos campos, pôr na mesa (aparece ao vivo para o jogador), jogador move o próprio token ao vivo, névoa (o token some do aparelho do jogador e volta ao revelar), colocar todos do combate, destaque da vez acompanhando o turno, combatente escondido, régua (5 quadrados · 7,5 m), área (29 quadrados, tokens atingidos), desenho, alfinete só do mestre, painel do token e tamanho 2×2.
+- `pnpm typecheck` e todos os testes (157) passam.
+
+**Falta:**
+
+1. e2e `apps/web/e2e/mapas.e2e.cjs` (opcional): o Playwright não está instalado neste Windows.
+2. Não verificado no navegador: o modo sem rede (aviso "só leitura" e ferramentas de edição escondidas).
+
+---
+
 Implemente uma feature nova no projeto **rpg-mesa**: **mapas com grid para posicionar os personagens**, integrada ao sistema que já existe, como se sempre tivesse feito parte dele. O escopo já foi definido com o usuário (decisões abaixo). Não faça mais perguntas de escopo: estude o código, implemente, teste e verifique no navegador.
 
 ## Contexto do projeto (já estudado)

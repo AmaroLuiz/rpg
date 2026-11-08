@@ -38,7 +38,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 export async function exportCampaign(campaignId: string) {
   const byCampaign = <T,>(table: string, cols = '*') => rows<T[]>(supabase.from(table as never).select(cols).eq('campaign_id', campaignId));
   const campaign = await rows<{ name: string; template_id: string } & Record<string, unknown>>(supabase.from('campaigns').select('*').eq('id', campaignId).single());
-  const [members, characters, items, itemSecrets, pools, handouts, recipients, notes, rolls, encounters, combatants, combatantSecrets, folders] = await Promise.all([
+  const [members, characters, items, itemSecrets, pools, handouts, recipients, notes, rolls, encounters, combatants, combatantSecrets, folders, maps, mapTokens, mapMarks] = await Promise.all([
     rows(supabase.from('campaign_members').select('user_id, role, joined_at, profile:profiles(display_name)').eq('campaign_id', campaignId)),
     byCampaign('characters'),
     byCampaign('items'),
@@ -52,6 +52,9 @@ export async function exportCampaign(campaignId: string) {
     byCampaign('combatants'),
     byCampaign('combatant_secrets'),
     byCampaign('folders'),
+    byCampaign('maps'),
+    byCampaign('map_tokens'),
+    byCampaign('map_marks'),
   ]);
   const versionIds = [...new Set((characters as Array<{ template_version_id: string }>).map((c) => c.template_version_id))];
   const templates = versionIds.length
@@ -76,6 +79,10 @@ export async function exportCampaign(campaignId: string) {
     combatants,
     combatant_secrets: combatantSecrets,
     folders,
+    // Mapas: grid, névoa, tokens e marcas. As imagens ficam no Storage (image_path), fora do JSON.
+    maps,
+    map_tokens: mapTokens,
+    map_marks: mapMarks,
   });
 }
 
