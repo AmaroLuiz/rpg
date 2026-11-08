@@ -1,8 +1,8 @@
 {
   "id": "ordem_paranormal",
   "name": "Ordem Paranormal",
-  "version": 3,
-  "description": "Template para Ordem Paranormal RPG. Traz estrutura e números mecânicos; textos de origens, poderes e rituais ficam a cargo da mesa. Confira os números com o livro antes de usar.",
+  "version": 4,
+  "description": "Template para Ordem Paranormal RPG. Traz estrutura e números mecânicos; rituais, poderes, origens e equipamentos podem ser adicionados do compêndio (com resumos e a página do livro). Confira os números com o livro antes de usar.",
   "fields": [
     {
       "id": "nome",
@@ -629,8 +629,18 @@
           "type": "text"
         },
         {
+          "id": "alvo",
+          "label": "Alvo / Área",
+          "type": "text"
+        },
+        {
           "id": "duracao",
           "label": "Duração",
+          "type": "text"
+        },
+        {
+          "id": "resistencia",
+          "label": "Resistência",
           "type": "text"
         },
         {

@@ -21,3 +21,5 @@ export function builtinTemplate(id: BuiltinTemplateId): CompiledTemplate {
   }
   return c;
 }
+
+export * from './compendium/index.js';

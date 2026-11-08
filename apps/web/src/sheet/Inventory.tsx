@@ -1,8 +1,11 @@
-import { Plus } from 'lucide-react';
+import { compendiumFor, inventoryItemFrom, type CompendiumEntry } from '@rpg/templates/compendium';
+import { BookOpen, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDeleteItem, useItemActions, useItems, useSetEquipped } from '../api/items';
-import { Button, cx } from '../components/ui';
+import { useDeleteItem, useItemActions, useItems, useSaveItem, useSetEquipped } from '../api/items';
+import { CompendiumDialog } from '../compendium/CompendiumDialog';
+import { Button, cx, ErrorNote } from '../components/ui';
+import { friendlyError } from '../lib/errors';
 import { ItemEditor } from '../items/ItemEditor';
 import { ItemList } from '../items/ItemList';
 import { useSheetCtx } from './context';
@@ -18,7 +21,17 @@ export function InventoryField() {
   const del = useDeleteItem();
   const { identify } = useItemActions();
   const [editing, setEditing] = useState<string | 'new' | null>(null);
+  const [book, setBook] = useState(false);
+  const save = useSaveItem(campaignId);
+  const compendium = compendiumFor(compiled.template.id);
   const inv = compiled.template.inventory;
+  /** Item do livro entra no inventário com os campos de item que este template tem. */
+  const addFromBook = (e: CompendiumEntry) => {
+    const item = inventoryItemFrom(e);
+    const fields = new Set(inv?.fields.map((f) => f.id) ?? []);
+    const data = Object.fromEntries(Object.entries(item.data).filter(([k]) => fields.has(k)));
+    save.mutate({ ...item, data, holder_type: 'character', holder_id: characterId });
+  };
   const load = inv?.loadField ? sheet.field(inv.loadField) : null;
   const cap = inv?.capacityField ? sheet.field(inv.capacityField) : null;
   const over = typeof load?.value === 'number' && typeof cap?.value === 'number' && load.value > cap.value;
@@ -70,11 +83,29 @@ export function InventoryField() {
         editing={(it) => (editing === it.id ? <ItemEditor campaignId={campaignId} compiled={compiled} item={it} isGm={isGm} onDone={() => setEditing(null)} /> : null)}
       />
       {editing === 'new' && <ItemEditor campaignId={campaignId} compiled={compiled} holder={{ type: 'character', id: characterId }} isGm={isGm} onDone={() => setEditing(null)} />}
+      {save.error && <ErrorNote>{friendlyError(save.error)}</ErrorNote>}
       {canEdit && editing !== 'new' && (
-        <Button variant="secondary" onClick={() => setEditing('new')}>
-          <Plus className="size-4" aria-hidden />
-          {t('items.add')}
-        </Button>
+        <div className={cx('grid gap-2', compendium && 'grid-cols-2')}>
+          <Button variant="secondary" onClick={() => setEditing('new')}>
+            <Plus className="size-4" aria-hidden />
+            {t('items.add')}
+          </Button>
+          {compendium && (
+            <Button variant="secondary" onClick={() => setBook(true)}>
+              <BookOpen className="size-4" aria-hidden />
+              {t('compendium.fromBook')}
+            </Button>
+          )}
+        </div>
+      )}
+      {book && compendium && (
+        <CompendiumDialog
+          compendium={compendium}
+          kinds={compendium.inventory}
+          title={t('compendium.addToInventory')}
+          onPick={addFromBook}
+          onClose={() => setBook(false)}
+        />
       )}
     </div>
   );

@@ -3,8 +3,9 @@
 // Uma versão nova de template = rode de novo com um nome de arquivo novo; versões já publicadas não mudam.
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const root = new URL('..', import.meta.url).pathname;
+const root = fileURLToPath(new URL('..', import.meta.url));
 const dir = join(root, 'packages/templates/src');
 const out = process.argv[2] ?? join(root, 'supabase/migrations/20261107000004_builtin_templates.sql');
 const DELIM = '$tpl$';
