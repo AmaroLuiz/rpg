@@ -1,4 +1,4 @@
-import { BookOpen, Check, Copy, Crown, Dices, Download, Gem, NotebookPen, RefreshCw, ScrollText } from 'lucide-react';
+import { BookOpen, Check, Copy, Crown, Dices, Download, Gem, Map as MapIcon, NotebookPen, RefreshCw, ScrollText } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
@@ -8,6 +8,7 @@ import { useCampaignRealtime } from '../api/realtime';
 import { CharacterList } from './CharacterList';
 import { CombatCard } from './CombatCard';
 import { LibraryCard } from './Library';
+import { MapCard } from './MapCard';
 import { RollHistory } from '../roller/RollHistory';
 import { useUserId } from '../auth/AuthProvider';
 import { Button, Card, ErrorNote, Spinner, cx } from '../components/ui';
@@ -69,10 +70,12 @@ export function Campaign() {
       {actionError && <ErrorNote>{friendlyError(actionError)}</ErrorNote>}
 
       <CombatCard campaignId={c.id} />
+      <MapCard campaignId={c.id} />
 
       <nav aria-label={t('hub.tools')} className="grid grid-cols-2 gap-2">
         {[
           { to: 'rolagens', label: t('roller.title'), icon: Dices },
+          { to: 'mapas', label: t('maps.title'), icon: MapIcon },
           { to: 'itens', label: t('items.title'), icon: Gem },
           { to: 'handouts', label: t('handouts.title'), icon: ScrollText },
           { to: 'diario', label: t('journal.diary'), icon: BookOpen },

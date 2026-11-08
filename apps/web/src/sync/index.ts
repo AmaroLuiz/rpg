@@ -4,6 +4,7 @@ import type { CharacterOp } from '@rpg/engine';
 import type { Json } from '../lib/database.types';
 import { supabase } from '../lib/supabase';
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { clearMapImages } from '../map/imageCache';
 import { clearLocalData, dexieStore, kvStorage } from './local';
 import { MemoryStore, Outbox, type Batch, type SendResult } from './outbox';
 
@@ -22,6 +23,7 @@ export async function forgetEverything() {
   queryClient.clear();
   await persister.removeClient();
   await clearLocalData();
+  await clearMapImages();
 }
 
 /** Códigos do Postgres que indicam falha passageira (conexão, timeout, conflito de transação). */

@@ -141,6 +141,15 @@ export function paintFog(g: Pick<Grid, 'cols' | 'rows'>, fog: string, c: Cell, o
 
 export const fillFog = (g: Pick<Grid, 'cols' | 'rows'>, on: boolean) => (on ? '1' : '0').repeat(g.cols * g.rows);
 
+/** Névoa depois de mudar `cols`/`rows`: cada célula que continua no grid mantém o estado. */
+export function resizeFog(from: Pick<Grid, 'cols' | 'rows'>, to: Pick<Grid, 'cols' | 'rows'>, fog: string): string {
+  let out = '';
+  for (let y = 0; y < to.rows; y++) {
+    for (let x = 0; x < to.cols; x++) out += x < from.cols && y < from.rows && fog[y * from.cols + x] === '1' ? '1' : '0';
+  }
+  return out;
+}
+
 /** Igual ao private.token_visible do banco: névoa desligada ou alguma célula do token revelada. */
 export function tokenVisible(g: Pick<Grid, 'cols' | 'rows'> & { fog_enabled: boolean; fog: string }, t: { x: number; y: number; size: number }): boolean {
   if (!g.fog_enabled) return true;

@@ -9,6 +9,7 @@ import {
   freeSpots,
   isRevealed,
   paintFog,
+  resizeFog,
   simplifyStroke,
   snapToken,
   tokenVisible,
@@ -102,6 +103,12 @@ describe('névoa', () => {
     expect(isRevealed(small, fog, { x: 1, y: 0 })).toBe(true);
     expect(isRevealed(small, fog, { x: 3, y: 0 })).toBe(false);
     expect(fillFog(small, true)).toBe('111111111111');
+  });
+
+  it('mantém cada célula no lugar quando o grid muda de tamanho', () => {
+    // 3x2: linha 0 = 101, linha 1 = 010
+    expect(resizeFog({ cols: 3, rows: 2 }, { cols: 2, rows: 3 }, '101010')).toBe('100100');
+    expect(resizeFog({ cols: 3, rows: 2 }, { cols: 4, rows: 2 }, '101010')).toBe('10100100');
   });
 
   it('token aparece se alguma célula dele está revelada (como no banco)', () => {

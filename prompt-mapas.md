@@ -27,17 +27,18 @@ docker exec supabase_db_rpg psql -U postgres -c "drop database if exists rpg_tes
 TEST_DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/rpg_test npx vitest run --project banco
 ```
 
-**Falta fazer (nesta ordem):**
+**Também pronto (08/11/2026, segunda sessão; sem commit até o usuário pedir):**
 
-1. `apps/web/src/api/maps.ts` (hooks e ações) + cache da imagem na Cache Storage + limpar o cache em `forgetEverything`.
-2. Handlers no `api/realtime.ts`.
-3. Strings `maps` no `pt-BR.ts`.
-4. Página de lista `/mesas/:id/mapas` + `MapCard` e atalho no hub.
-5. Quadro `/mesas/:id/mapas/:mapId` com pan/zoom e ferramentas.
-6. Painel do token.
-7. Exportar campanha.
-8. README.
-9. Verificação no navegador com duas contas e e2e opcional.
+- `api/maps.ts` (hooks, ações, movimento otimista, `acceptTokenRow` para o tempo real), `map/imageCache.ts` (imagem na Cache Storage, limpa em `forgetEverything`), handlers em `api/realtime.ts` (combate também invalida os mapas), strings `maps` no `pt-BR.ts`, `lib/useOnline.ts`.
+- Telas: `pages/Maps.tsx` (lista; mapa novo abre no ajuste do grid com `?ajustar=1`), `pages/MapCard.tsx` + atalho no hub, `pages/MapBoard.tsx` (quadro), `map/layers.tsx` (grid, névoa, marcas, tokens) e `map/panels.tsx` (token, colocar, grid, névoa, área, desenho, alfinete, marca).
+- `resizeFog` em `geometry.ts` (+ teste). Exportar campanha leva `maps`, `map_tokens` e `map_marks`. README com a linha do M8, a seção Mapas e a limitação da névoa.
+- Verificado no navegador embutido com mestre (localhost) e jogador (127.0.0.1), celular 375×812: upload, alinhar o grid arrastando e pelos campos, pôr na mesa (aparece ao vivo para o jogador), jogador move o próprio token ao vivo, névoa (o token some do aparelho do jogador e volta ao revelar), colocar todos do combate, destaque da vez acompanhando o turno, combatente escondido, régua (5 quadrados · 7,5 m), área (29 quadrados, tokens atingidos), desenho, alfinete só do mestre, painel do token e tamanho 2×2.
+- `pnpm typecheck` e todos os testes (157) passam.
+
+**Falta:**
+
+1. e2e `apps/web/e2e/mapas.e2e.cjs` (opcional): o Playwright não está instalado neste Windows.
+2. Não verificado no navegador: o modo sem rede (aviso "só leitura" e ferramentas de edição escondidas).
 
 ---
 

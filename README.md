@@ -16,6 +16,7 @@ Documento de arquitetura e modelo de dados: https://claude.ai/artifact/7NpTy27nT
 | M5 — Mesa | Pronto: rolagens no servidor (Edge Function) a partir da ficha ou livres, secreta do mestre, "só para o mestre", histórico e aviso ao vivo; biblioteca de NPCs e monstros; combate com cópias numeradas, iniciativa rolada e ordenada, turnos e rodadas, PV secreto de inimigos com estado público, esconder combatentes |
 | M6 — Mestre | Pronto: inventário editável com carga e bônus ao equipar, biblioteca de itens, baús revelados na hora certa (mestre distribui ou cada um pega), item misterioso identificado depois, handouts com imagem para todos ou para escolhidos, diário de sessões e notas com busca em português e etiquetas |
 | M7 — Refinamento | Pronto: subir de nível/NEX (o PV atual acompanha o máximo), descansos, rolagens salvas (macros), exportar campanha e ficha em JSON, importar ficha em outra mesa, app instalável que abre sem internet, rolagem offline marcada no histórico, código dividido por tela |
+| M8 — Mapas | Pronto: mapas com imagem de fundo e grid quadrado alinhável (lado, deslocamento, colunas, linhas, metros por quadrado), um mapa "na mesa" para todos e os outros em preparo, tokens ligados às fichas e ao combate (retrato, estado, destaque da vez, 1×1 a 4×4), jogador move o próprio token ao vivo, névoa de guerra, régua, áreas de efeito (círculo, cone, linha), desenho livre e alfinetes com nota (para todos ou só o mestre) |
 
 ## Estrutura
 
@@ -48,13 +49,20 @@ O app é uma PWA: no navegador do celular, use "Adicionar à tela inicial". Depo
 
 - mudanças na ficha ficam guardadas e são enviadas quando a rede volta (inclusive se o app for fechado no meio);
 - rolagens feitas sem internet são roladas no aparelho e vão para o histórico marcadas como "offline";
-- inventário, notas, handouts e combate precisam de internet para mudar (ficam só para leitura offline).
+- inventário, notas, handouts, combate e mapas precisam de internet para mudar (ficam só para leitura offline; a imagem do mapa fica guardada no aparelho depois da primeira vez).
 
 Ao sair da conta, tudo que o aparelho guardou é apagado.
 
+## Mapas
+
+- O mestre cria o mapa (com ou sem imagem), alinha o grid arrastando o mapa na ferramenta "Grid" e o põe "na mesa". Mapas em preparo ficam escondidos dos jogadores até serem mostrados.
+- Tokens vêm das fichas e do combate atual ("Colocar todos do combate"). Combatente escondido no combate e token escondido ou sob a névoa não chegam ao aparelho do jogador.
+- Limitação conhecida: a névoa cobre a imagem na tela do jogador, mas a imagem de fundo inteira é baixada. Quem quiser esconder uma sala de verdade deve deixá-la fora da imagem ou trocar a imagem depois.
+- Fora desta versão: iluminação dinâmica, paredes com linha de visão, grid hexagonal, pintura de terreno e edição offline.
+
 ## Exportar e importar
 
-- Mestre: "Exportar campanha (JSON)" na página da mesa leva fichas, itens (com segredos), baús, handouts, notas, diário, rolagens, combates e os templates usados.
+- Mestre: "Exportar campanha (JSON)" na página da mesa leva fichas, itens (com segredos), baús, handouts, notas, diário, rolagens, combates, mapas (grid, névoa, tokens e marcas; as imagens ficam no Storage) e os templates usados.
 - Dono da ficha: "Exportar ficha (JSON)" na ficha. A ficha exportada pode ser importada em outra mesa do mesmo sistema ("Importar ficha de outra mesa").
 
 ## Testes
